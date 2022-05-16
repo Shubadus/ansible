@@ -1,0 +1,11 @@
+---
+- hosts: localhost 
+  become: true
+  roles:
+    - role: baseline
+      become: true
+    - role: sway
+      become: true
+    - role: work
+      become: true
+

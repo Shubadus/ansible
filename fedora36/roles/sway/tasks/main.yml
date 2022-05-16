@@ -1,0 +1,30 @@
+---
+- name: install sway packages
+  dnf:
+    name:
+      - sway
+      - swaybg
+      - swayidle
+      - swaylock
+      - sway-systemd
+
+- name: install additional wlroot applications
+  dnf:
+    name:
+      - kanshi # like autorandr
+      - grim # screenshot
+      - waybar # pretty bar
+      - wdisplays # like arandr
+      - wofi # like rofi
+      - wlr-randr # like xrandr
+
+- name: install additional applications
+  dnf:
+    name:
+      - blueberry
+      - dunst
+      - gnome-tweaks # manage gtk themes
+      - light # backlight manager
+      - nm-connection-editor
+      - qt5ct # manage qt themes
+
