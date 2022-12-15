@@ -1,0 +1,201 @@
+---
+- name: BookStack Install
+  hosts: localhost
+  become: yes
+  vars:
+    IP_ADDR: "{{ ansible_facts['ansible_default_ipv4']['address'] }}"
+    BOOKSTACK_DIR: /var/www/bookstack
+    DB_PASS: "{{ lookup('ansible.builtin.password', '/dev/null', seed=inventory_hostname, length=20)"
+    DOMAIN: "docs.cameronch.com"
+  tasks:
+    - name: Check if server is a fresh install
+      block:
+        - name: Check if Apache is already installed
+          stat:
+            path: /etc/apache2/sites-enabled
+          register: APACHE
+
+        - name: Check if MySQL is already installed
+          stat:
+            path: /var/lib/mysql
+          register: MYSQL
+
+    - name: Fail if not a clean install
+      fail:
+        msg: "This is not a clean installation of Bookstack, this playbook will not run."
+      when: (APACHE.stat.exists) or (MYSQL.stat.exists)
+
+    - name: Install BookStack Dependencies
+      apt:
+        - curl
+        - git
+        - unzip
+        - apache2
+        - php8.1
+        - php8.1-curl
+        - php8.1-mbstring
+        - php8.1-ldap
+        - php8.1-xml
+        - php8.1-zip
+        - php8.1-gd
+        - php8.1-mysql
+        - mysql-server-8.0
+        - libapache2-mod-php8.1
+      tags: init
+
+    - name: Build MySQL Database
+      command: "mysql -u root --execute {{ item }}"
+      loop:
+        - "CREATE DATABASE bookstack;"
+        - "CREATE USER 'bookstack'@'localhost' IDENTIFIED WITH mysql_native_password BY '{{ DB_PASS }}';"
+        - "GRANT ALL ON bookstack. To 'bookstack'@'localhost';"
+        - "FLUSH PRIVILEGES;"
+      tags:
+        - init
+        - database
+      when: not MYSQL_INSTALLATION.stat.exists
+
+    - name: Download BookStack (Git)
+      git:
+        repo: https://github.com/BookStackApp/BookStack.git
+        dest: "{{ BOOKSTACK_DIR }}"
+        single_branch: yes
+        version: release
+      tags: 
+        - init
+        - Bookstack
+
+    - name: Install PHP Composer
+      shell: curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+      args:
+        creates: /usr/local/bin/composer
+
+    - name: Install BookStack composer dependencies
+      command: 
+        cmd: "php /usr/local/bin/composer install --no-dev --no-plugins"
+        chdir: "{{ BOOKSTACK_DIR }}"
+
+    - name: Setup Bookstack .env
+      block:
+        - name: copy Bookstack .env file
+          copy:
+            src: "{{ BOOKSTACK_DIR }}/.env.example"
+            dest: "{{ BOOKSTACK_DIR }}/.env"
+
+        - name: write Bookstack .env file
+          lineinfile:
+            path: "{{ BOOKSTACK_DIR }}/.env"
+            search_string: "{{ item.search_string }}"
+            line: "{{ item.line }}"
+          loop:
+            - { search_string: 'APP_URL=', line: "APP_URL=https://{{ DOMAIN }}" }
+            - { search_string: 'DB_DATABASE=', line: "DB_DATABASE=bookstack" }
+            - { search_string: 'DB_USERNAME=', line: "DB_USERNAME=bookstack" }
+            - { search_string: 'DB_PASSWORD=', line: "DB_PASSWORD={{ DB_PASS }}" }
+
+        - name: Generate Bookstack .env application key
+          command:
+            cmd: php artisan key:generate --no-interaction --force
+            chdir: "{{ BOOKSTACK_DIR }}"
+
+    - name: Run Bookstack DB Migration
+      command:
+        cmd: php artisan migrate --no-interaction --force
+        chdir: "{{ BOOKSTACK_DIR }}"
+
+    - name: Set File permissions
+      file:
+        path: "{{ item.path }}"
+        owner: "{{ ansible_facts['ansible_user_id'] }}"
+        mode: "{{ item.mode }}"
+      loop:
+        - { path: "{{ BOOKSTACK_DIR }}", mode: 755 }
+        - { path: "{{ BOOKSTACK_DIR }}/bootstrap/cache", mode: 775 }
+        - { path: "{{ BOOKSTACK_DIR }}/public/uploads", mode: 775 }
+        - { path: "{{ BOOKSTACK_DIR }}/storage", mode: 775 }
+        - { path: "{{ BOOKSTACK_DIR }}/.env", mode: 740 }
+
+    - name: Set Git to ignore file permission changes to Bookstack
+      command:
+        cmd: git config core.fileMode false
+        chdir: "{{ BOOKSTACK_DIR }}"
+
+    - name: Enable required Apache Modules
+      command:
+        cmd: |
+          a2enmod rewrite
+          a2enmod php8.1
+
+    - name: Setup SSL Certificate
+      block:
+        - name: Create Cameron Cert Directory
+          file:
+            path: /etc/ssl/cameron-wildcard/
+            state: directory
+
+        - name: 
+      # TODO:
+      # Finish setting up SSL Cert configuration
+
+    - name: Setup BookStack Apache Config
+      file:
+        dest: /etc/apache2
+        content: |
+          "<VirtualHost *:80>
+              ServerName {{ DOMAIN }}
+              Redirect permanent / https://{{ DOMAIN }}
+          </VirtualHost>
+
+          <VirtualHost *:443>
+            ServerName {{ DOMAIN }} 
+
+            ServerAdmin webmaster@localhost
+            DocumentRoot /var/www/bookstack/public/
+
+            SSLEngine on
+            SSLCertificateFile /etc/ssl/cameron-wildcard/cameronmch.com.crt
+            SSLCertificateKeyFile /etc/ssl/cameron-wildcard/cameronmch.com.key
+            SSLCertificateChainFile /etc/ssl/cameron-wildcard/cameronmch.com-ca.crt
+            <Directory /var/www/bookstack/public/>
+                Options -Indexes +FollowSymLinks
+                AllowOverride None
+                Require all granted
+                <IfModule mod_rewrite.c>
+                    <IfModule mod_negotiation.c>
+                        Options -MultiViews -Indexes
+                    </IfModule>
+
+                    RewriteEngine On
+
+                    # Handle Authorization Header
+                    RewriteCond %{HTTP:Authorization} .
+                    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+                    # Redirect Trailing Slashes If Not A Folder...
+                    RewriteCond %{REQUEST_FILENAME} !-d
+                    RewriteCond %{REQUEST_URI} (.+)/$
+                    RewriteRule ^ %1 [L,R=301]
+
+                    # Handle Front Controller...
+                    RewriteCond %{REQUEST_FILENAME} !-d
+                    RewriteCond %{REQUEST_FILENAME} !-f
+                    RewriteRule ^ index.php [L]
+                </IfModule>
+            </Directory>
+
+            ErrorLog ${APACHE_LOG_DIR}/error.log
+            CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+          </VirtualHost>"
+
+    - name: Disable default apache site and enable BookStack
+      command:
+        chdir: "{{ BOOKSTACK_DIR }}"
+        cmd: |
+          a2dissite 000-default.conf
+          a2ensite bookstack.conf
+
+    - name: Restart apache to load new config
+      systemd:
+        name: apache2
+        state: restarted

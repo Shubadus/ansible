@@ -1,0 +1,195 @@
+---
+- hosts: localhost 
+  become: true
+  tasks:
+    - name: Install baseline applications
+      block:
+        - name: install browsers
+          dnf:
+            name:
+              - chromium
+              - qutebrowser
+
+        - name: install terminals
+          dnf:
+            name: alacritty
+
+        - name: install terminal applications
+          dnf:
+            name:
+              - dunst # notifcation manager
+              - btop
+              - feh # wallpaper
+              - lshw
+              - neovim
+              - ranger
+              - timeshift
+              - tmux
+              - tlp # power management
+              - zsh
+
+        - name: install programming langauages, packages, and frameworks
+          dnf:
+            name:
+              - go
+              - nodejs
+              - python3-pip
+              - python3-poetry
+
+        - name: install virtualization packages
+          dnf:
+            name: "@virtualization"
+
+        - name: install misc packages
+          dnf:
+            name:
+              - docker
+              - ImageMagick
+
+        - name: install pywal via pip
+          pip:
+            name: pywal
+
+        - name: install AppImageLauncher
+          dnf:
+            name: https://github.com/TheAssassin/AppImageLauncher/releases/download/v2.2.0/appimagelauncher-2.2.0-travis995.0f91801.x86_64.rpm
+            disable_gpg_check: true
+
+        - name: install TeamViewer
+          dnf:
+            name: https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm
+            disable_gpg_check: true
+      tags: baseline
+
+    - name: install xorg and tools
+      block:
+        - name: Install xorg
+          dnf:
+            name: "@base-x"
+
+        - name: Install qtile dependencies
+          block: 
+            - name: x11 dnf
+              dnf:
+                name:
+                  - python3-xcffib
+                  - libxkbcommon-devel
+            - name: x11 pip
+              pip:
+                name:
+                  - pyconfig
+                  - xkbcommon
+
+            - name: Install betterlockscreen
+              block:
+                - name: install i3lock dependencies
+                  dnf:
+                    name:
+                      - autoconf
+                      - automake
+                      - cairo-devel
+                      - fontconfig
+                      - gcc
+                      - libev-devel
+                      - libjpeg-turbo-devel
+                      - libXinerama
+                      - libxkbcommon-devel
+                      - libxkbcommon-x11-devel
+                      - libXrandr
+                      - pam-devel
+                      - pkgconf
+                      - xcb-util-image-devel
+                      - xcb-util-xrm-devel
+
+                - name: download i3lock-color
+                  git:
+                    repo: https://github.com/Raymo111/i3lock-color.git
+                    dest: /tmp/i3lock-color
+
+                - name: install i3lock-color
+                  shell:
+                    chdir: /tmp/i3lock-color
+                    cmd: "./install-i3lock-color.sh"
+                    creates: /usr/bin/i3lock
+
+                - name: download betterlockscreen
+                  git:
+                    repo: https://github.com/betterlockscreen/betterlockscreen.git
+                    dest: /tmp/betterlockscreen
+
+                - name: install betterlockscreen
+                  copy: 
+                    src: /tmp/betterlockscreen/betterlockscreen
+                    dest: /usr/local/bin/betterlockscreen
+
+                - name: download arcolinux-betterlockscreen
+                  git:
+                    repo: https://github.com/arcolinux/arcolinux-betterlockscreen.git
+                    dest: /tmp/arcolinux-betterlockscreen
+
+                - name: install arcolinux-betterlockscreen
+                  copy:
+                    src: /tmp/arcolinux-betterlockscreen/usr/
+                    dest: /usr/
+      tags: x11
+
+
+    - name: install wayland and tools
+      block:
+        - name: install qtile dependencies
+          block:
+            - name: wayland dnf
+              dnf:
+                name:
+                  - wlroots
+                  # - waybar
+                  - xdg-desktop-portal-wlr
+                  - wdisplays
+                  - wofi
+
+            - name: wayland pip
+              pip:
+                name:
+                  - pywayland
+                  - pywlroots
+      tags: wayland
+
+    - name: Install qtile
+      block:
+        - name: ensure pip is installed
+          dnf:
+            name: python3-pip
+            state: present
+
+        - name: install common dependencies
+          block:
+            - name: install common dependencies (DNF)
+              dnf:
+                name:
+                  - pango
+                  - python3-cffi
+                  - python3-dbus-next
+                  - python3-devel
+
+        - name: install qtile
+          pip:
+            name: git+https://github.com/qtile/qtile.git/
+      tags: qtile
+
+        ## Work Programs
+    - name: Install work applications
+      block:
+        - name: install Remmina
+          dnf:
+            name: remmina
+
+        - name: install Microsoft Teams
+          dnf:
+            name: https://packages.microsoft.com/yumrepos/ms-teams/teams-1.5.00.10453-1.x86_64.rpm
+            disable_gpg_check: true
+
+        - name: install 1password CLI
+          dnf:
+            name: https://downloads.1password.com/linux/rpm/stable/x86_64/1password-cli-latest.x86_64.rpm
+            disable_gpg_check: true
+
