@@ -9,15 +9,15 @@
       - org.mozilla.firefox
       - org.qutebrowser.qutebrowser
       # KDE
-      - org.kde.ark # Archive Manager
-      - org.kde.filelight # Disk Usage
-      - org.kde.kget # Download Manager
-      - org.kde.krdc # Remote Desktop Client
-      - org.kde.ktorrent # Torrent Client
+      # - org.kde.ark # Archive Manager
+      # - org.kde.filelight # Disk Usage
+      # - org.kde.kget # Download Manager
+      # - org.kde.krdc # Remote Desktop Client
+      # - org.kde.ktorrent # Torrent Client
       # Other Packages
       - io.mpv.Mpv
       - org.libreoffice.LibreOffice
-      - org.qbittorrent.qBittorrent
+      # - org.qbittorrent.qBittorrent
       - com.microsoft.Teams
       - com.visualstudio.code
       - md.obsidian.Obsidian
@@ -80,19 +80,19 @@
 
     - name: Install KDE
       dnf:
-        - "@kde-desktop"
+        name:
+          - "@kde-desktop"
+          - bismuth
 
-    - name: Install KDE Plasma Extensions
-      block:
-        - name: Install KDE Bismuth
-          dnf:
-            - bismuth
+    - name: Add the flathub flatpak repo
+      community.general.flatpak_remote:
+        name: flathub
+        flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
 
-        # - name: Install Compact Pager
 
     - name: Install Flatpak Applications
       flatpak:
-        name: {{ flatpaks }}
+        name: "{{ flatpaks }}"
 
     - name: Install work applications
       block:
