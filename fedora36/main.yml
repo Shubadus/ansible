@@ -4,61 +4,122 @@
   tasks:
     - name: Install baseline applications
       block:
+        - name: install tools
+          dnf:
+            name:
+              - filelight # Disk Usage Display
+              - libreoffice # Office Suite
+              - mpv # Lightweight Media Player
+              - qbittorent # Torrent Client
+
+        - name: install archiving tools
+          dnf:
+            name:
+              - ark # Archive Manager
+              - zip
+              - unrar
+              - unzip
+
         - name: install browsers
           dnf:
             name:
               - chromium
               - qutebrowser
 
-        - name: install terminals
-          dnf:
-            name: alacritty
-
-        - name: install terminal applications
+        - name: install terminals and terminal software
           dnf:
             name:
-              - dunst # notifcation manager
+              - alacritty
               - btop
-              - feh # wallpaper
+              - git
               - lshw
-              - neovim
-              - ranger
-              - timeshift
               - tmux
-              - tlp # power management
               - zsh
 
-        - name: install programming langauages, packages, and frameworks
-          dnf:
-            name:
-              - go
-              - nodejs
-              - python3-pip
-              - python3-poetry
+        # - name: install terminal editors
+        #   block:
+        #     - name: Install NeoVim
+        #       dnf:
+        #         name: neovim
 
-        - name: install virtualization packages
-          dnf:
-            name: "@virtualization"
+        #     - name: Install LunarVim
 
-        - name: install misc packages
-          dnf:
-            name:
-              - docker
-              - ImageMagick
+        - name: install applications
+          block:
+            - name: install misc packages
+              dnf:
+                name:
+                  - dunst # notifcation manager
+                  - feh # wallpaper
+                  - lshw
+                  - tmux
+                  - zsh
 
-        - name: install pywal via pip
-          pip:
-            name: pywal
+            - name: install backup software
+              dnf:
+                name:
+                  - timeshift
 
-        - name: install AppImageLauncher
-          dnf:
-            name: https://github.com/TheAssassin/AppImageLauncher/releases/download/v2.2.0/appimagelauncher-2.2.0-travis995.0f91801.x86_64.rpm
-            disable_gpg_check: true
+            - name: install build software
+              dnf:
+                name:
+                  - cmake
+                  - meson
 
-        - name: install TeamViewer
-          dnf:
-            name: https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm
-            disable_gpg_check: true
+            - name: install file managers
+              dnf:
+                name:
+                  - pcmanfm-qt
+                  - ranger
+
+            - name: install power management
+              dnf:
+                name:
+                  - tlp
+                  - xfce4-power-manager
+
+            - name: install printing system
+              dnf:
+                name:
+                  - cups
+                  - system-config-printer
+
+            - name: install programming langauages, packages, and frameworks
+              dnf:
+                name:
+                  - go
+                  - nodejs
+                  - python3-pip
+                  - python3-poetry
+
+            - name: install virtualization packages
+              dnf:
+                name: "@virtualization"
+
+            - name: install volume control
+              dnf:
+                name:
+                  - pavucontrol
+
+            - name: install misc packages
+              dnf:
+                name:
+                  - docker
+                  - ImageMagick
+
+            - name: install pywal via pip
+              pip:
+                name: pywal
+
+            - name: install AppImageLauncher
+              dnf:
+                name: https://github.com/TheAssassin/AppImageLauncher/releases/download/v2.2.0/appimagelauncher-2.2.0-travis995.0f91801.x86_64.rpm
+                disable_gpg_check: true
+
+            - name: install TeamViewer
+              dnf:
+                name: https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm
+                disable_gpg_check: true
       tags: baseline
 
     - name: install xorg and tools
@@ -67,20 +128,89 @@
           dnf:
             name: "@base-x"
 
-        - name: Install qtile dependencies
-          block: 
-            - name: x11 dnf
+        - name: Install Ibhagwan fork of Picom
+          block:
+            - name: install dependencies
               dnf:
                 name:
-                  - python3-xcffib
-                  - libxkbcommon-devel
-            - name: x11 pip
-              pip:
-                name:
-                  - pyconfig
-                  - xkbcommon
+                  - dbus-devel
+                  - gcc
+                  - libconfig-devel
+                  - libdrm-devel
+                  - libev-devel
+                  - libX11-devel
+                  - libX11-xcb
+                  - libXext-devel
+                  - libxcb-devel
+                  - libGL-devel
+                  - libEGL-devel
+                  - pcre-devel
+                  - pcre2-devel
+                  - pixman-devel
+                  - uthash-devel
+                  - xcb-util-image-devel
+                  - xcb-util-renderutil-devel
+                  - xorg-x11-proto-devel
 
-            - name: Install betterlockscreen
+            - name: clone repo
+              git:
+                repo: https://github.com/ibhagwan/picom
+                depth: 1
+                dest: /tmp/ibhagwan-picom
+                single_branch: true
+                version: next-rebase
+
+            - name: meson setup
+              shell: 
+                chdir: /tmp/ibhagwan-picom
+                cmd: meson setup --buildtype=release . build
+                creates: /tmp/ibhagwan-picom/build/
+
+            - name: build and install
+              shell:
+                chdir: /tmp/ibhagwan-picom
+                cmd: ninja -C build install
+                creates: /usr/local/bin/picom
+
+        - name: Install tiling window manager packages
+          block:
+            - name: install xorg screen management tools
+              dnf:
+                name:
+                  - arandr
+                  - autorandr
+
+            - name: install application launcher
+              dnf:
+                name:
+                  - rofi
+                  - rofi-themes
+
+            - name: install logout menu
+              block:
+                - name: download archlinux-logout
+                  git:
+                    repo: https://github.com/arcolinux/archlinux-logout
+                    dest: /tmp/archlinux-logout
+
+                - name: install arcolinux-betterlockscreen
+                  copy:
+                    src: /tmp/archlinux-logout/usr/
+                    dest: /usr/
+                    mode: "755"
+
+            - name: Install Network Manager
+              dnf:
+                name:
+                  - NetworkManager
+                  - NetworkManager-bluetooth
+                  - NetworkManager-openconnect
+                  - NetworkManager-tui
+                  - NetworkManager-wifi
+                  - network-manager-applet
+                  - nm-connection-editor
+
+            - name: Install screenlocker
               block:
                 - name: install i3lock dependencies
                   dnf:
@@ -121,6 +251,7 @@
                   copy: 
                     src: /tmp/betterlockscreen/betterlockscreen
                     dest: /usr/local/bin/betterlockscreen
+                    mode: "755"
 
                 - name: download arcolinux-betterlockscreen
                   git:
@@ -131,28 +262,46 @@
                   copy:
                     src: /tmp/arcolinux-betterlockscreen/usr/
                     dest: /usr/
-      tags: x11
+                    mode: "755"
+          tags: tiling, x11    
 
-
-    - name: install wayland and tools
-      block:
-        - name: install qtile dependencies
-          block:
-            - name: wayland dnf
+        - name: Install qtile dependencies
+          block: 
+            - name: x11 dnf
               dnf:
                 name:
-                  - wlroots
-                  # - waybar
-                  - xdg-desktop-portal-wlr
-                  - wdisplays
-                  - wofi
+                  - libxkbcommon-devel
+                  - picom
+                  - python3-psutil
+                  - python3-xcffib
 
-            - name: wayland pip
+            - name: x11 pip
               pip:
                 name:
-                  - pywayland
-                  - pywlroots
-      tags: wayland
+                  - pyconfig
+                  - xkbcommon
+
+      tags: x11
+
+    # - name: install wayland and tools
+    #   block:
+    #     - name: install qtile dependencies
+    #       block:
+    #         - name: wayland dnf
+    #           dnf:
+    #             name:
+    #               - wlroots
+    #               # - waybar
+    #               - xdg-desktop-portal-wlr
+    #               - wdisplays
+    #               - wofi
+
+    #         - name: wayland pip
+    #           pip:
+    #             name:
+    #               - pywayland
+    #               - pywlroots
+    #   tags: wayland
 
     - name: Install qtile
       block:
@@ -171,9 +320,10 @@
                   - python3-dbus-next
                   - python3-devel
 
-        - name: install qtile
+        - name: install latest qtile release
           pip:
-            name: git+https://github.com/qtile/qtile.git/
+            name: qtile
+            # name: git+https://github.com/qtile/qtile.git/
       tags: qtile
 
         ## Work Programs
@@ -183,10 +333,13 @@
           dnf:
             name: remmina
 
-        - name: install Microsoft Teams
-          dnf:
-            name: https://packages.microsoft.com/yumrepos/ms-teams/teams-1.5.00.10453-1.x86_64.rpm
-            disable_gpg_check: true
+        - name: install Teams for Linux
+          community.general.flatpak:
+            name: com.github.IsmaelMartinez.teams_for_linux
+
+        - name: install Visual Studio Code
+          community.general.flatpak:
+            name: com.visualstudio.code
 
         - name: install 1password CLI
           dnf:

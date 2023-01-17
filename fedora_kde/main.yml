@@ -1,0 +1,103 @@
+---
+- hosts: localhost 
+  become: true
+  vars:
+    flatpaks:
+      # Browsers
+      - com.brave.Browser
+      - org.chromium.Chromium
+      - org.mozilla.firefox
+      - org.qutebrowser.qutebrowser
+      # KDE
+      - org.kde.ark # Archive Manager
+      - org.kde.filelight # Disk Usage
+      - org.kde.kget # Download Manager
+      - org.kde.krdc # Remote Desktop Client
+      - org.kde.ktorrent # Torrent Client
+      # Other Packages
+      - io.mpv.Mpv
+      - org.libreoffice.LibreOffice
+      - org.qbittorrent.qBittorrent
+      - com.microsoft.Teams
+      - com.visualstudio.code
+      - md.obsidian.Obsidian
+      - org.flameshot.Flameshot
+      - org.gimp.GIMP
+
+  tasks:
+    - name: Install baseline applications
+      block:
+        - name: install terminals and terminal software
+          dnf:
+            name:
+              - alacritty
+              - btop
+              - git
+              - lshw
+              - tmux
+              - zsh
+
+        - name: install applications
+          block:
+            - name: install backup software
+              dnf:
+                name:
+                  - timeshift
+
+            - name: install build software
+              dnf:
+                name:
+                  - cmake
+                  - meson
+
+            - name: install file managers
+              dnf:
+                name:
+                  - ranger
+
+            - name: install programming langauages, packages, and frameworks
+              dnf:
+                name:
+                  - go
+                  - nodejs
+                  - python3-pip
+                  - python3-poetry
+
+            - name: install virtualization packages
+              dnf:
+                name: "@virtualization"
+
+            - name: install AppImageLauncher
+              dnf:
+                name: https://github.com/TheAssassin/AppImageLauncher/releases/download/v2.2.0/appimagelauncher-2.2.0-travis995.0f91801.x86_64.rpm
+                disable_gpg_check: true
+
+            - name: install TeamViewer
+              dnf:
+                name: https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm
+                disable_gpg_check: true
+      tags: baseline
+
+    - name: Install KDE
+      dnf:
+        - "@kde-desktop"
+
+    - name: Install KDE Plasma Extensions
+      block:
+        - name: Install KDE Bismuth
+          dnf:
+            - bismuth
+
+        # - name: Install Compact Pager
+
+    - name: Install Flatpak Applications
+      flatpak:
+        name: {{ flatpaks }}
+
+    - name: Install work applications
+      block:
+        - name: install 1password CLI
+          dnf:
+            name: https://downloads.1password.com/linux/rpm/stable/x86_64/1password-cli-latest.x86_64.rpm
+            disable_gpg_check: true
+
