@@ -1,12 +1,29 @@
 ---
 - hosts: localhost 
   become: true
-  tasks:
+  tasks: 
+
+    - name: Install Repos
+      block:
+        - name: Install Flatpak Repos
+          community.general.flatpak_remote:
+            name: flathub
+            state: present
+            flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+            method: user
+
+        - name: Install RPM Fusion Repos
+          dnf:
+            name:
+              - "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm"
+              - "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
+
     - name: Install baseline applications
       block:
         - name: install tools
           dnf:
             name:
+              - flatpak # System Agnostic Package Management
               - filelight # Disk Usage Display
               - libreoffice # Office Suite
               - mpv # Lightweight Media Player
@@ -36,11 +53,11 @@
               - tmux
               - zsh
 
-        # - name: install terminal editors
-        #   block:
-        #     - name: Install NeoVim
-        #       dnf:
-        #         name: neovim
+        - name: install terminal editors
+          block:
+            - name: Install NeoVim
+              dnf:
+                name: neovim
 
         #     - name: Install LunarVim
 
@@ -283,25 +300,25 @@
 
       tags: x11
 
-    # - name: install wayland and tools
-    #   block:
-    #     - name: install qtile dependencies
-    #       block:
-    #         - name: wayland dnf
-    #           dnf:
-    #             name:
-    #               - wlroots
-    #               # - waybar
-    #               - xdg-desktop-portal-wlr
-    #               - wdisplays
-    #               - wofi
+    - name: install wayland and tools
+      block:
+        - name: install qtile dependencies
+          block:
+            - name: wayland dnf
+              dnf:
+                name:
+                  - wlroots
+                  # - waybar
+                  - xdg-desktop-portal-wlr
+                  - wdisplays
+                  - wofi
 
-    #         - name: wayland pip
-    #           pip:
-    #             name:
-    #               - pywayland
-    #               - pywlroots
-    #   tags: wayland
+            - name: wayland pip
+              pip:
+                name:
+                  - pywayland
+                  - pywlroots
+      tags: wayland
 
     - name: Install qtile
       block:
@@ -324,18 +341,42 @@
           pip:
             name: qtile
             # name: git+https://github.com/qtile/qtile.git/
+
+        - name: create destkop entries
+          block:
+            - name: create wayland session
+              copy:
+                dest: /usr/share/wayland-sessions/qtile-wayland.desktop
+                content: |
+                  [Desktop Entry]
+                  Name=Qtile (Wayland)
+                  Comment=Qtile Session
+                  Exec=qtile start -b wayland
+                  Type=Application
+                  Keywords=wm;tiling
+
+            - name: create x11 session
+              copy:
+                dest: /usr/share/xsessions/qtile.desktop
+                content: |
+                  [Desktop Entry]
+                  Name=Qtile
+                  Comment=Qtile Session
+                  Exec=qtile start
+                  Type=Application
+                  Keywords=wm;tiling
       tags: qtile
 
-        ## Work Programs
+    ## Work Programs
     - name: Install work applications
       block:
         - name: install Remmina
-          dnf:
-            name: remmina
-
-        - name: install Teams for Linux
           community.general.flatpak:
-            name: com.github.IsmaelMartinez.teams_for_linux
+            name: org.remmina.Remmina
+
+        - name: install Microsoft Teams 
+          community.general.flatpak:
+            name: com.microsoft.Teams
 
         - name: install Visual Studio Code
           community.general.flatpak:
@@ -345,4 +386,3 @@
           dnf:
             name: https://downloads.1password.com/linux/rpm/stable/x86_64/1password-cli-latest.x86_64.rpm
             disable_gpg_check: true
-
