@@ -395,5 +395,6 @@
 
         - name: install 1password CLI
           dnf:
-            name: https://downloads.1password.com/linux/rpm/stable/x86_64/1password-cli-latest.x86_64.rpm
+            name: https://downloads.1password.com/linux/rpm/stable/x86_64/1password-latest.rpm
+            # name: https://downloads.1password.com/linux/rpm/stable/x86_64/1password-cli-latest.x86_64.rpm
             disable_gpg_check: true
