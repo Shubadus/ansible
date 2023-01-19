@@ -3,21 +3,6 @@
   become: true
   tasks: 
 
-    - name: Install Repos
-      block:
-        - name: Install Flatpak Repos
-          community.general.flatpak_remote:
-            name: flathub
-            state: present
-            flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
-            method: user
-
-        - name: Install RPM Fusion Repos
-          dnf:
-            name:
-              - "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm"
-              - "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
-
     - name: Install baseline applications
       block:
         - name: install tools
@@ -28,6 +13,21 @@
               - libreoffice # Office Suite
               - mpv # Lightweight Media Player
               - qbittorent # Torrent Client
+
+        - name: Install Repos
+          block:
+            - name: Install Flatpak Repos
+              community.general.flatpak_remote:
+                name: flathub
+                state: present
+                flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+                method: user
+
+            - name: Install RPM Fusion Repos
+              dnf:
+                name:
+                  - "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm"
+                  - "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
 
         - name: install archiving tools
           dnf:
