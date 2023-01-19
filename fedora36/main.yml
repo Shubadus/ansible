@@ -393,6 +393,12 @@
             state: started
             enabled: yes
 
+        - name: Change default target to graphical.target
+            file:
+              src: /usr/lib/systemd/system/graphical.target
+              dest: /etc/systemd/system/default.target
+              state: link
+
     ## Work Programs
     - name: Install work applications
       block:
