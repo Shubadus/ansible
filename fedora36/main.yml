@@ -378,6 +378,21 @@
                   Keywords=wm;tiling
       tags: qtile
 
+    - name: Setup LightDM
+      block:
+        - name: Install LightDM and Greeter
+          dnf:
+            name:
+              - lightdm
+              - lightdm-gtk
+              - lightdm-gtk-greeter-settings
+
+        - name: Enable LightDM Service
+          systemd:
+            name: lightdm.service
+            state: started
+            enabled: yes
+
     ## Work Programs
     - name: Install work applications
       block:
@@ -398,3 +413,8 @@
             name: https://downloads.1password.com/linux/rpm/stable/x86_64/1password-latest.rpm
             # name: https://downloads.1password.com/linux/rpm/stable/x86_64/1password-cli-latest.x86_64.rpm
             disable_gpg_check: true
+
+
+    - name: Update Packages
+      dnf:
+        update_only: True
