@@ -24,20 +24,20 @@
                 method: user
 
 
-        - name: Install RPM Fusion Repos
-          block:
-            - name: Install RPM Fusion Free
-              yum_repository:
-                name: RPM Fusion Free
-                description: RPM Fusion Free Repo
-                baseurl: https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-fedora.noarch.rpm
+        # - name: Install RPM Fusion Repos
+        #   block:
+        #     - name: Install RPM Fusion Free
+        #       yum_repository:
+        #         name: RPM Fusion Free
+        #         description: RPM Fusion Free Repo
+        #         baseurl: https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-fedora.noarch.rpm
 
-            - name: Install RPM Fusion Free
-              yum_repository:
-                name: RPM Fusion Free
-                description: RPM Fusion Free Repo
-                baseurl: https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-fedora.noarch.rpm
-               
+        #     - name: Install RPM Fusion Free
+        #       yum_repository:
+        #         name: RPM Fusion Free
+        #         description: RPM Fusion Free Repo
+        #         baseurl: https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-fedora.noarch.rpm
+
         - name: install archiving tools
           dnf:
             name:
@@ -298,6 +298,8 @@
                 name:
                   - libxkbcommon-devel
                   - picom
+                  - python3-devel
+                  - python3-lxml
                   - python3-psutil
                   - python3-xcffib
 
