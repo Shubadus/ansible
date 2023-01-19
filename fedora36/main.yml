@@ -399,6 +399,50 @@
               dest: /etc/systemd/system/default.target
               state: link
 
+    - name: configure theming
+      block:
+        - name: Install theme tools
+          dnf:
+            name:
+              - kvantum
+              - lxappearance
+              - qt5ct
+
+        - name: set qt5ct as qt default
+          copy:
+            dest: /etc/environment
+            content: |
+              QT_QPA_PLATFORM_THEME="qt5ct"
+
+        - name: Install built-in themes
+          dnf:
+            name:
+              - adwaita-cursor-theme
+              - adwaita-icon-theme
+              - adwaita-qt5
+              - adwaita-qt6
+              - breeze-cursor-theme
+              - breeze-gtk-gtk3
+              - breeze-icon-theme
+              - plasma-breeze
+
+        - name: Install fonts
+          block:
+            - name: Download Noto Font
+              get_url: https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.1/Noto.zip
+              dest: /tmp/fonts/
+
+            - name: Install Noto Fonts
+              unarchive:
+                src: /tmp/fonts/Noto.zip
+                dest: /usr/share/fonts
+
+        - name: Install Wallpapers
+          dnf:
+            name:
+              - kde-wallpapers
+              - sway-wallpapers
+
     ## Work Programs
     - name: Install work applications
       block:
