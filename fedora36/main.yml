@@ -2,6 +2,17 @@
 - hosts: localhost 
   become: true
   tasks: 
+    - name: check for existing files
+      block:
+        - name: register status of Noto Nerd Fonts
+          stat:
+            path: /usr/shares/fonts/noto-nerd-fonts
+          register: noto_nerd_fonts
+
+        - name: register status of betterlockscreen
+          stat:
+            path: /usr/local/bin/arcolinux-betterlockscreen
+          register: betterlockscreen
 
     - name: Install baseline applications
       block:
@@ -12,7 +23,7 @@
               - filelight # Disk Usage Display
               - libreoffice # Office Suite
               - mpv # Lightweight Media Player
-              # - qbittorent # Torrent Client
+              - qbittorrent # Torrent Client
 
         - name: Install Repos
           block:
@@ -20,18 +31,23 @@
               community.general.flatpak_remote:
                 name: flathub
                 state: present
-                flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
-                method: user
+                flatpakrepo_url: https://flathub.org/repo/flathub.flatpakrepo
+                method: system 
 
-        - name: Install RPM Fusion Repos
-          block:
-            - name: Install RPM Fusion Free
-              dnf:
-                name: "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ansible_distribution}}.noarch.rpm"
+            - name: Install RPM Fusion Repos
+              block:
+              - name: Install RPM Fusion Free
+                dnf:
+                name: "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ansible_distribution_major_version}}.noarch.rpm"
 
-            - name: Install RPM Fusion NonFree
-              dnf:
-                name: "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution}}.noarch.rpm"
+              - name: Install RPM Fusion NonFree
+                dnf:
+                name: "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution_major_version}}.noarch.rpm"
+
+            - name: install Flatpak programs
+              community.general.flatpak:
+                name:
+                  - com.github.tchx84.Flatseal #Flatpak Permissions GUI Manager
 
         - name: install archiving tools
           dnf:
@@ -70,6 +86,7 @@
             - name: install misc packages
               dnf:
                 name:
+                  - polkit-gnome
                   - dunst # notifcation manager
                   - feh # wallpaper
                   - lshw
@@ -126,9 +143,9 @@
                     baseurl: https://packages.microsoft.com/config/rhel/7/prod.repo
                     gpgkey: https://packages.microsoft.com/keys/microsoft.asc
 
-                - name: install powershell
-                  dnf:
-                    name: powershell
+                      #- name: install powershell
+                      #dnf:
+                      #name: powershell
 
             - name: install virtualization packages
               dnf:
@@ -253,6 +270,7 @@
                   - nm-connection-editor
 
             - name: Install screenlocker
+              when: not betterlockscreen.stat.exists
               block:
                 - name: install i3lock dependencies
                   dnf:
@@ -368,7 +386,6 @@
         - name: install latest qtile release
           pip:
             name: qtile
-            # name: git+https://github.com/qtile/qtile.git/
 
         - name: create destkop entries
           block:
@@ -411,10 +428,10 @@
             enabled: yes
 
         - name: Change default target to graphical.target
-            file:
-              src: /usr/lib/systemd/system/graphical.target
-              dest: /etc/systemd/system/default.target
-              state: link
+          file:
+            src: /usr/lib/systemd/system/graphical.target
+            dest: /etc/systemd/system/default.target
+            state: link
 
     - name: configure theming
       block:
@@ -444,15 +461,22 @@
               - plasma-breeze
 
         - name: Install fonts
+          when: not noto_nerd_fonts.stat.exists
           block:
+            - name: create fonts temp folder
+              file:
+                path: /usr/share/fonts/noto-nerd-fonts
+                state: directory
+
             - name: Download Noto Font
-              get_url: https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.1/Noto.zip
-              dest: /tmp/fonts/
+              get_url:
+                url: https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.1/Noto.zip
+                dest: /tmp/
 
             - name: Install Noto Fonts
               unarchive:
-                src: /tmp/fonts/Noto.zip
-                dest: /usr/share/fonts
+                src: /tmp/Noto.zip
+                dest: /usr/share/fonts/noto-nerd-fonts
 
         - name: Install Wallpapers
           dnf:
@@ -481,15 +505,23 @@
               yum_repository:
                 name: 1password
                 description: 1Password RPM Repository
-                baseurl: ttps://downloads.1password.com/linux/rpm/stable/\$basearch
+                baseurl: https://downloads.1password.com/linux/rpm/stable/\$basearch
                 gpgkey: https://downloads.1password.com/linux/keys/1password.asc
 
             - name: install 1Password apps
               dnf:
-                - 1password
-                - 1password-cli
+                name:
+                  - 1password
+                  - 1password-cli
 
 
     - name: Update Packages
       dnf:
         update_only: True
+
+    - name: Create User Folders
+      shell:
+        cmd: xdg-user-dirs-update
+        chdir: "{{ ansible_env.HOME }}"
+        creates: "{{ ansible_env.HOME }}/Documents"
+
