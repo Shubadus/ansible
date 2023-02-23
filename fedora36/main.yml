@@ -19,6 +19,7 @@
         - name: install tools
           dnf:
             name:
+              - dnf-utils # dnf utilities
               - flatpak # System Agnostic Package Management
               - filelight # Disk Usage Display
               - libreoffice # Office Suite
@@ -38,11 +39,13 @@
               block:
               - name: Install RPM Fusion Free
                 dnf:
-                name: "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ansible_distribution_major_version}}.noarch.rpm"
+                  name: "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ansible_distribution_major_version}}.noarch.rpm"
+                  disable_gpg_check: true
 
               - name: Install RPM Fusion NonFree
                 dnf:
-                name: "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution_major_version}}.noarch.rpm"
+                  name: "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution_major_version}}.noarch.rpm"
+                  disable_gpg_check: true
 
             - name: install Flatpak programs
               community.general.flatpak:
@@ -87,7 +90,7 @@
               dnf:
                 name:
                   - polkit-gnome
-                  - dunst # notifcation manager
+                  - dunst # notifcation managers
                   - feh # wallpaper
                   - lshw
                   - tmux
@@ -104,9 +107,13 @@
                   - cmake
                   - meson
 
-            - name: install file managers
+            - name: install file managers and dependencies
               dnf:
                 name:
+                  - gvfs
+                  - gvfs-smb
+                  - gvfs-mtp
+                  - gvfs-gphoto2
                   - pcmanfm-qt
                   - ranger
 
@@ -137,15 +144,13 @@
             - name: install powershell 7
               block:
                 - name: install powershell repo
-                  yum_repository:
-                    name: microsoft
-                    description: Microsoft Repository
-                    baseurl: https://packages.microsoft.com/config/rhel/7/prod.repo
-                    gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+                  dnf:
+                    name: https://github.com/PowerShell/PowerShell/releases/download/v7.3.2/powershell-7.3.2-1.rh.x86_64.rpm
+                    disable_gpg_check: true
 
-                      #- name: install powershell
-                      #dnf:
-                      #name: powershell
+                - name: install powershell
+                  dnf:
+                    name: powershell
 
             - name: install virtualization packages
               dnf:
@@ -252,11 +257,16 @@
                     repo: https://github.com/arcolinux/archlinux-logout
                     dest: /tmp/archlinux-logout
 
-                - name: install arcolinux-betterlockscreen
+                - name: install arcolinux-betterlockscreen and archlinux-logout
                   copy:
                     src: /tmp/archlinux-logout/usr/
                     dest: /usr/
                     mode: "755"
+
+                - name: copy archlinux-logout config file
+                  copy:
+                    src: /tmp/archlinux-logout/etc/
+                    dest: /etc/ 
 
             - name: Install Network Manager
               dnf:
@@ -290,6 +300,7 @@
                       - pkgconf
                       - xcb-util-image-devel
                       - xcb-util-xrm-devel
+                      - xset
 
                 - name: download i3lock-color
                   git:
@@ -441,12 +452,13 @@
               - kvantum
               - lxappearance
               - qt5ct
+              - qt5-qtstyleplugins
 
         - name: set qt5ct as qt default
           copy:
-            dest: /etc/environment
+            dest: "{{ ansible_env.HOME }}/.profile"
             content: |
-              QT_QPA_PLATFORM_THEME="qt5ct"
+              export QT_QPA_PLATFORMTHEME="qt5ct"
 
         - name: Install built-in themes
           dnf:
@@ -459,6 +471,30 @@
               - breeze-gtk-gtk3
               - breeze-icon-theme
               - plasma-breeze
+
+        - name: Install Nordic GTK theme
+          block:
+            - name: Download Nordic GTK theme
+              get_url:
+                url: https://github.com/EliverLara/Nordic/releases/download/v2.2.0/Nordic.tar.xz
+                dest: /tmp/
+
+            - name: Extract to root themes folder
+              unarchive:
+                src: /tmp/Nordic.tar.xz
+                dest: /usr/share/themes/
+
+        - name: Install Nordzy-cyan-dark font
+          block:
+            - name: Download Nordic GTK theme
+              get_url:
+                url: https://github.com/alvatip/Nordzy-icon/releases/download/1.8.1/Nordzy-cyan-dark.tar.gz 
+                dest: /tmp/
+
+            - name: Extract to root themes folder
+              unarchive:
+                src: /tmp/Nordzy-cyan-dark.tar.gz
+                dest: /usr/share/themes/
 
         - name: Install fonts
           when: not noto_nerd_fonts.stat.exists
@@ -499,20 +535,20 @@
           community.general.flatpak:
             name: com.visualstudio.code
 
-        - name: install 1password
-          block:
-            - name: add 1Password repo
-              yum_repository:
-                name: 1password
-                description: 1Password RPM Repository
-                baseurl: https://downloads.1password.com/linux/rpm/stable/\$basearch
-                gpgkey: https://downloads.1password.com/linux/keys/1password.asc
-
-            - name: install 1Password apps
-              dnf:
-                name:
-                  - 1password
-                  - 1password-cli
+        # - name: install 1password
+        #   block:
+        #     - name: add 1Password repo
+        #       yum_repository:
+        #         name: 1password
+        #         description: 1Password RPM Repository
+        #         baseurl: https://downloads.1password.com/linux/rpm/stable/\$basearch
+        #         gpgkey: https://downloads.1password.com/linux/keys/1password.asc
+        #
+        #     - name: install 1Password apps
+        #       dnf:
+        #         name:
+        #           - 1password
+        #           - 1password-cli
 
 
     - name: Update Packages
