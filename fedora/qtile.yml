@@ -1,0 +1,58 @@
+name: install qtile
+tasks:
+  - name: ensure pip is installed
+    dnf:
+      name: python3-pip
+      state: present
+
+  - name: install common dependencies
+    block:
+      - name: install common dependencies (DNF)
+        dnf:
+          name:
+            - pango
+            - python3-cffi
+            - python3-dbus-next
+            - python3-devel
+
+
+      - name: install common dependencies (pip)
+        dnf:
+          name: ""
+
+  - name: install x11 dependencies
+    block:
+      - name: x11 dnf
+        dnf:
+          name:
+            - python3-xcffib
+            - libxkbcommon-devel
+
+      - name: x11 pip
+        pip:
+          name:
+            - pyconfig
+            - xkbcommon
+    tags: x11
+
+  - name: install wayland dependencies
+    block:
+      - name: wayland dnf
+        dnf:
+          name: wlroots
+
+      - name: wayland pip
+        pip:
+          name:
+            - pywayland
+            - pywlroots
+
+    tags: wayland
+
+  - name: install additional wlroot components
+    dnf:
+      name:
+        - waybar
+        - wdisplays
+        - wofi
+    tags: wayland

@@ -1,0 +1,11 @@
+---
+- name: install xorg packages
+  dnf:
+    name:
+      - autorandr
+      - arandr
+      - rofi
+      - feh
+      - xfce4-power-manager
+  tags: xorg
+    
