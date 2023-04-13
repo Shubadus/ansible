@@ -8,10 +8,25 @@
             path: /usr/shares/fonts/noto-nerd-fonts
           register: noto_nerd_fonts
 
+        - name: register status of Nordic theme
+          stat:
+            path: /usr/share/themes/Nordic
+          register: nordic_theme
+
+        - name: register status of Nordzy-cyan-dark icons
+          stat:
+            path: /usr/share/icons/Nordzy-cyan-dark
+          register: nordzy_icons
+
         - name: register status of lockscreen
           stat:
             path: /usr/local/bin/i3lock
           register: lockscreen
+
+        - name: register status of logout
+          stat:
+            path: /usr//bin/archlinux-logout
+          register: logout
 
     - name: Install baseline applications
       block:
@@ -215,6 +230,7 @@
             name: "@base-x"
           become: true
 
+        # TODO: Register a variable to check if Ibhagwan fork already exists
         - name: Install Ibhagwan fork of Picom
           block:
             - name: install dependencies
@@ -272,7 +288,7 @@
             - name: install application launcher
               dnf:
                 name:
-                  - rofi
+                  - rofi-wayland
                   - rofi-themes
               become: true
 
@@ -295,6 +311,7 @@
                     src: /tmp/archlinux-logout/etc/
                     dest: /etc/ 
                   become: true
+              when: not logout.stat.exists
 
             - name: Install Network Manager
               dnf:
@@ -309,7 +326,6 @@
               become: true
 
             - name: Install screenlocker
-              when: not lockscreen.stat.exists
               block:
                 - name: install i3lock dependencies
                   dnf:
@@ -330,6 +346,7 @@
                       - xcb-util-image-devel
                       - xcb-util-xrm-devel
                       - xset
+                  become: true
 
                 - name: download i3lock-color
                   git:
@@ -341,6 +358,8 @@
                     chdir: /tmp/i3lock-color
                     cmd: "./install-i3lock-color.sh"
                     creates: /usr/bin/i3lock
+                  become: true
+              when: not lockscreen.stat.exists
           tags: tiling, x11    
 
         - name: Install qtile dependencies
@@ -361,7 +380,6 @@
                 name:
                   - pyconfig
                   - xkbcommon
-
       tags: x11
 
     - name: install wayland and tools
@@ -371,12 +389,14 @@
             - name: wayland dnf
               dnf:
                 name:
+                  - rofi-wayland
+                  - kanshi
+                  - swayidle
                   - swaylock
+                  - wlogout
                   - wlroots
-                  # - waybar
-                  - xdg-desktop-portal-wlr
                   - wdisplays
-                  - wofi
+                  - xdg-desktop-portal-wlr
               become: true
 
             - name: wayland pip
@@ -392,6 +412,7 @@
           dnf:
             name: python3-pip
             state: present
+          become: true
 
         - name: install common dependencies
           block:
@@ -407,6 +428,7 @@
         - name: install latest qtile release
           pip:
             name: qtile
+          become: true
 
         - name: create destkop entries
           block:
@@ -504,11 +526,11 @@
 
         - name: set qt5ct as qt default
           copy:
-            # dest: "{{ ansible_env.HOME }}/.profile"
-            dest: "/etc/environment"
+            dest: "{{ ansible_env.HOME }}/.profile"
+            # dest: "/etc/environment"
             content: |
-              QT_QPA_PLATFORMTHEME="qt5ct"
-          become: true
+              export QT_QPA_PLATFORMTHEME="qt5ct"
+          # become: true
 
         - name: Install built-in themes
           dnf:
@@ -535,8 +557,9 @@
                 src: /tmp/Nordic.tar.xz
                 dest: /usr/share/themes/
               become: true
+          when: not nordic_theme.stat.exists
 
-        - name: Install Nordzy-cyan-dark font
+        - name: Install Nordzy-cyan-dark icons
           block:
             - name: Download Nordic GTK theme
               get_url:
@@ -546,8 +569,9 @@
             - name: Extract to root themes folder
               unarchive:
                 src: /tmp/Nordzy-cyan-dark.tar.gz
-                dest: /usr/share/themes/
-              become: true
+                dest: /usr/share/icons/
+              become: 
+          when: not nordzy_icons.stat.exists
 
         - name: Install fonts
           when: not noto_nerd_fonts.stat.exists
@@ -555,44 +579,7 @@
             - name: create fonts temp folder
               file:
                 path: /usr/share/fonts/noto-nerd-fonts
-                state: directory
-              become: true
-
-            - name: Download Noto Font
-              get_url:
-                url: https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.1/Noto.zip
-                dest: /tmp/
-
-            - name: Install Noto Fonts
-              unarchive:
-                src: /tmp/Noto.zip
-                dest: /usr/share/fonts/noto-nerd-fonts
-              become: true
-
-        - name: Install Wallpapers
-          dnf:
-            name:
-              - kde-wallpapers
-              - sway-wallpapers
-          become: true
-
-    ## Work Programs
-    - name: Install work applications
-      block:
-        - name: install Flatpaks 
-          community.general.flatpak:
-            name: 
-              - org.remmina.Remmina # Remmina
-              - https://downloads.1password.com/linux/flatpak/1Password.flatpakref # 1Password
-              - com.github.IsmaelMartinez.teams_for_linux # Microsoft Teams
-              - com.visualstudio.code # Visual Studio Code
-
-    - name: Update Packages
-      dnf:
-        update_only: True
-      become: true
-
-    - name: Create User Folders
+                state: director   - name: Create User Folders
       shell:
         cmd: xdg-user-dirs-update
         chdir: "{{ ansible_env.HOME }}"
