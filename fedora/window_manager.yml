@@ -1,0 +1,171 @@
+---
+- name: install xorg and tools
+  block:
+    - name: Install xorg
+      dnf:
+        name: "@base-x"
+
+    - name: Install Ibhagwan fork of Picom
+      block:
+        - name: install dependencies
+          dnf:
+            name:
+              - dbus-devel
+              - libconfig-devel
+              - libdrm-devel
+              - libev-devel
+              - libX11-devel
+              - libX11-xcb
+              - libXext-devel
+              - libxcb-devel
+              - libGL-devel
+              - libEGL-devel
+              - pcre-devel
+              - pcre2-devel
+              - pixman-devel
+              - uthash-devel
+              - xcb-util-image-devel
+              - xcb-util-renderutil-devel
+              - xorg-x11-proto-devel
+
+        - name: clone repo
+          git:
+            repo: https://github.com/ibhagwan/picom
+            depth: 1
+            dest: /tmp/ibhagwan-picom
+            single_branch: true
+            version: next-rebase
+
+        - name: meson setup
+          shell: 
+            chdir: /tmp/ibhagwan-picom
+            cmd: meson setup --buildtype=release . build
+            creates: /tmp/ibhagwan-picom/build/
+
+        - name: build and install
+          shell:
+            chdir: /tmp/ibhagwan-picom
+            cmd: ninja -C build install
+            creates: /usr/local/bin/picom
+
+    - name: Install tiling window manager packages
+      block:
+        - name: install xorg screen management tools
+          dnf:
+            name:
+              - arandr
+              - autorandr
+
+        - name: install application launcher
+          dnf:
+            name:
+              - rofi
+              - rofi-themes
+
+        - name: install logout menu
+          block:
+            - name: download archlinux-logout
+              git:
+                repo: https://github.com/arcolinux/archlinux-logout
+                dest: /tmp/archlinux-logout
+
+            - name: install arcolinux-betterlockscreen and archlinux-logout
+              copy:
+                src: /tmp/archlinux-logout/usr/
+                dest: /usr/
+                mode: "755"
+
+            - name: copy archlinux-logout config file
+              copy:
+                src: /tmp/archlinux-logout/etc/
+                dest: /etc/ 
+
+        - name: Install Network Manager
+          dnf:
+            name:
+              - NetworkManager
+              - NetworkManager-bluetooth
+              - NetworkManager-openconnect
+              - NetworkManager-tui
+              - NetworkManager-wifi
+              - network-manager-applet
+              - nm-connection-editor
+
+        - name: Install screenlocker
+          when: not betterlockscreen.stat.exists
+          block:
+            - name: install i3lock dependencies
+              dnf:
+                name:
+                  - autoconf
+                  - automake
+                  - cairo-devel
+                  - fontconfig
+                  - gcc
+                  - libev-devel
+                  - libjpeg-turbo-devel
+                  - libXinerama
+                  - libxkbcommon-devel
+                  - libxkbcommon-x11-devel
+                  - libXrandr
+                  - pam-devel
+                  - pkgconf
+                  - xcb-util-image-devel
+                  - xcb-util-xrm-devel
+                  - xset
+
+            - name: download i3lock-color
+              git:
+                repo: https://github.com/Raymo111/i3lock-color.git
+                dest: /tmp/i3lock-color
+
+            - name: install i3lock-color
+              shell:
+                chdir: /tmp/i3lock-color
+                cmd: "./install-i3lock-color.sh"
+                creates: /usr/bin/i3lock
+
+            - name: download betterlockscreen
+              git:
+                repo: https://github.com/betterlockscreen/betterlockscreen.git
+                dest: /tmp/betterlockscreen
+
+            - name: install betterlockscreen
+              copy: 
+                src: /tmp/betterlockscreen/betterlockscreen
+                dest: /usr/local/bin/betterlockscreen
+                mode: "755"
+
+            - name: download arcolinux-betterlockscreen
+              git:
+                repo: https://github.com/arcolinux/arcolinux-betterlockscreen.git
+                dest: /tmp/arcolinux-betterlockscreen
+
+            - name: install arcolinux-betterlockscreen
+              copy:
+                src: /tmp/arcolinux-betterlockscreen/usr/
+                dest: /usr/
+                mode: "755"
+      tags: tiling, x11    
+  tags: x11
+
+- name: install wayland and tools
+  block:
+    - name: install qtile dependencies
+      block:
+        - name: wayland dnf
+          dnf:
+            name:
+              - swaylock
+              - wlroots
+              # - waybar
+              - xdg-desktop-portal-wlr
+              - wdisplays
+              - wofi
+
+        - name: wayland pip
+          pip:
+            name:
+              - pywayland
+              - pywlroots
+

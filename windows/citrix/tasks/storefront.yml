@@ -1,0 +1,9 @@
+- name: install citrix storefront
+
+- name: install imprivata authentication plugin for citrix storefront
+
+- name: install vmware tools
+
+- name: install PowerShell SDK for storefront
+
+- name: install Azure Connected Machine Agent

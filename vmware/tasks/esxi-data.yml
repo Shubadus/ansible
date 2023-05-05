@@ -1,0 +1,27 @@
+---
+- hosts: localhost
+  tasks:
+    - name: get list of vms
+      vmware_vm_info:
+        hostname: cmch-cc-prod1.cameron.lan
+        username: cameron-admin
+        password: ARE@ypy5efy.bfd!dpx
+        validate_certs: false
+        vm_type: "vm"
+        show_cluster: false
+        show_datacenter: false
+        show_datastore: false
+        show_esxi_hostname: false
+        show_mac_address: false
+        show_net: false
+        show_resource_pool: false
+        show_tag: false
+      register: vminfo
+      
+    - name: filter out powered off vms
+      set_fact:
+        vm_list: "{{ vminfo.virtual_machines | selectattr('power_state', 'eq', 'poweredOn') }}"
+
+    - name: Print output
+      debug:
+        var: vm_list

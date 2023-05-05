@@ -1,58 +1,61 @@
-name: install qtile
-tasks:
-  - name: ensure pip is installed
-    dnf:
-      name: python3-pip
-      state: present
+---
+- name: ensure pip is installed
+  dnf:
+    name: python3-pip
+    state: present
 
-  - name: install common dependencies
-    block:
-      - name: install common dependencies (DNF)
-        dnf:
-          name:
-            - pango
-            - python3-cffi
-            - python3-dbus-next
-            - python3-devel
+- name: Install x11 dependencies
+  block: 
+    - name: x11 dnf
+      dnf:
+        name:
+          - libxkbcommon-devel
+          - picom
+          - python3-devel
+          - python3-lxml
+          - python3-psutil
+          - python3-xcffib
 
+    - name: x11 pip
+      pip:
+        name:
+          - pyconfig
+          - xkbcommon
 
-      - name: install common dependencies (pip)
-        dnf:
-          name: ""
+- name: install common dependencies
+  block:
+    - name: install common dependencies (DNF)
+      dnf:
+        name:
+          - pango
+          - python3-cffi
+          - python3-dbus-next
+          - python3-devel
 
-  - name: install x11 dependencies
-    block:
-      - name: x11 dnf
-        dnf:
-          name:
-            - python3-xcffib
-            - libxkbcommon-devel
+- name: install latest qtile release
+  pip:
+    name: qtile
 
-      - name: x11 pip
-        pip:
-          name:
-            - pyconfig
-            - xkbcommon
-    tags: x11
+- name: create destkop entries
+  block:
+    - name: create wayland session
+      copy:
+        dest: /usr/share/wayland-sessions/qtile-wayland.desktop
+        content: |
+          [Desktop Entry]
+          Name=Qtile (Wayland)
+          Comment=Qtile Session
+          Exec=qtile start -b wayland
+          Type=Application
+          Keywords=wm;tiling
 
-  - name: install wayland dependencies
-    block:
-      - name: wayland dnf
-        dnf:
-          name: wlroots
-
-      - name: wayland pip
-        pip:
-          name:
-            - pywayland
-            - pywlroots
-
-    tags: wayland
-
-  - name: install additional wlroot components
-    dnf:
-      name:
-        - waybar
-        - wdisplays
-        - wofi
-    tags: wayland
+    - name: create x11 session
+      copy:
+        dest: /usr/share/xsessions/qtile.desktop
+        content: |
+          [Desktop Entry]
+          Name=Qtile
+          Comment=Qtile Session
+          Exec=qtile start
+          Type=Application
+          Keywords=wm;tiling

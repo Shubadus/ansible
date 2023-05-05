@@ -1,0 +1,86 @@
+---
+- name: collect runnings vms on host
+  vmware_vm_info:
+    hostname: "{{ esxi.hostname }}"
+    username: "{{ esxi.username }}"
+    password: "{{ esxi.password }}"
+    validate_certs: false
+    vm_type: "vm"
+    show_cluster: false
+    show_datacenter: false
+    show_datastore: false
+    show_esxi_hostname: false
+    show_mac_address: false
+    show_net: false
+    show_resource_pool: false
+    show_tag: false
+  register: vminfo
+  
+- name: filter out powered off vms
+  set_fact:
+    vm_list: "{{ vminfo.virtual_machines | selectattr('power_state', 'eq', 'poweredOn') }}"
+
+- name: migrate vms to different hosts
+  community.vmware.vmware_motion:
+    hostname: "{{ esxi.hostname }}"
+    username: "{{ esxi.username }}"
+    password: "{{ esxi.password }}"
+    vm_name: "{{ vm_name }}"
+    destination_host: "{{ destination_host }}"
+
+- name: ESXi enter maintenance 
+  register: status
+  vmware_maintenancemode:
+    hostname: "{{ esxi.hostname }}"
+    username: "{{ esxi.username }}"
+    password: "{{ esxi.password }}"
+    esxi_hostname: "{{ esxi.hostname }}"
+    evacuate: yes
+    validate_certs: no
+    timeout: 3600
+    state: present
+  delegate_to: localhost
+
+- debug:
+    var: status.msg 
+
+- name: perform updates on host
+  shell: "esxcli software profile update -d {{ vmware_depot }} -p {{ esxi_update_package }}" 
+  register: vib 
+
+- name: reboot if needed
+  community.vmware.vmware_host_powerstate:
+    hostname: "{{ esxi.hostname }}"
+    username: "{{ esxi.username }}"
+    password: "{{ esxi.password }}"
+    esxi_hostname: "{{ esxi.hostname }}"
+    validate_certs: no
+    state: reboot-host
+  delegate_to: localhost
+  register: reboot_host
+  when: '"Reboot Required: true" in vib'
+
+- name: wait for reboot to complete
+  wait_for:
+    host: "{{ esxi.hostname }}"
+    port: 443
+    delay: 360
+    state: started
+    timeout: 3600
+  delegate_to: localhost
+
+- name: take host out of maintenance mode
+  community.vmware.vmware_maintenancemode:
+    hostname: "{{ esxi.hostname }}"
+    username: "{{ esxi.username }}"
+    password: "{{ esxi.password }}"
+    esxi_hostname: "{{ esxi.hostname }}"
+    state: absent 
+
+- name: migrate vms back to host
+  community.vmware.vmware_motion:
+    hostname: "{{ esxi.hostname }}"
+    username: "{{ esxi.username }}"
+    password: "{{ esxi.password }}"
+    vm_name: "{{ vm_name }}"
+    destination_host: "{{ esxi.hostname }}"

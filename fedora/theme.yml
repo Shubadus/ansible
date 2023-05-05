@@ -1,0 +1,74 @@
+---
+- name: Install theme tools
+  dnf:
+    name:
+      - kvantum
+      - lxappearance
+      - qt5ct
+      - qt5-qtstyleplugins
+
+- name: set qt5ct as qt default
+  copy:
+    dest: "{{ ansible_env.HOME }}/.profile"
+    content: |
+      export QT_QPA_PLATFORMTHEME="qt5ct"
+
+- name: Install built-in themes
+  dnf:
+    name:
+      - adwaita-cursor-theme
+      - adwaita-icon-theme
+      - adwaita-qt5
+      - adwaita-qt6
+      - breeze-cursor-theme
+      - breeze-gtk-gtk3
+      - breeze-icon-theme
+      - plasma-breeze
+
+- name: Install Nordic GTK theme
+  block:
+    - name: Download Nordic GTK theme
+      get_url:
+        url: https://github.com/EliverLara/Nordic/releases/download/v2.2.0/Nordic.tar.xz
+        dest: /tmp/
+
+    - name: Extract to root themes folder
+      unarchive:
+        src: /tmp/Nordic.tar.xz
+        dest: /usr/share/themes/
+
+- name: Install Nordzy-cyan-dark font
+  block:
+    - name: Download Nordic GTK theme
+      get_url:
+        url: https://github.com/alvatip/Nordzy-icon/releases/download/1.8.1/Nordzy-cyan-dark.tar.gz 
+        dest: /tmp/
+
+    - name: Extract to root themes folder
+      unarchive:
+        src: /tmp/Nordzy-cyan-dark.tar.gz
+        dest: /usr/share/themes/
+
+- name: Install fonts
+  when: not noto_nerd_fonts.stat.exists
+  block:
+    - name: create fonts temp folder
+      file:
+        path: /usr/share/fonts/noto-nerd-fonts
+        state: directory
+
+    - name: Download Noto Font
+      get_url:
+        url: https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.1/Noto.zip
+        dest: /tmp/
+
+    - name: Install Noto Fonts
+      unarchive:
+        src: /tmp/Noto.zip
+        dest: /usr/share/fonts/noto-nerd-fonts
+
+- name: Install Wallpapers
+  dnf:
+    name:
+      - kde-wallpapers
+      - sway-wallpapers

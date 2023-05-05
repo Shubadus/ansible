@@ -1,0 +1,20 @@
+---
+- name: Cisco ASA 
+  hosts: firewall
+  connection: network_cli
+  become_method: enable
+  become: yes
+  gather_facts: false
+  tasks:
+    - name: Gather ASA Facts
+      cisco.asa.asa_facts:
+        gather_subset:
+          - config
+
+      register: asa_facts
+      vars: 
+        ansible_command_timeout: 1800
+
+    - name: Print Facts
+      debug:
+        var: asa_facts

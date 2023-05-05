@@ -1,0 +1,58 @@
+all:
+  # hosts:
+  children:
+    domain_controllers:
+      vars:
+        ansible_connection: winrm
+        ansible_user: administrator@cameron.lan
+        ansible_port: 5985
+        ansible_winrm_transport: credssp
+        ansible_winrm_message_encryption: always
+      hosts:
+        cmch-dc1.cameron.lan:
+          ansible_host: 192.168.1.15
+
+        cmch-dc2.cameron.lan:
+          ansible_host: 192.168.1.16
+        
+        cmch-dc3.cameron.lan:
+          ansible_host: 192.168.1.14
+
+    print_servers:
+      vars:
+        ansible_connection: winrm
+        ansible_user: administrator@cameron.lan
+        ansible_port: 5985
+        ansible_winrm_transport: credssp
+        ansible_winrm_message_encryption: always
+      hosts:
+        cmch-print.cameron.lan:
+          ansible_host: 192.168.2.59
+
+    citrix:
+      vars:
+        ansible_connection: winrm
+        ansible_user: administrator@cameron.lan
+        ansible_port: 5985
+        ansible_winrm_transport: credssp
+        ansible_winrm_message_encryption: always
+      children:
+        storefronts:
+          hosts:
+            cmch-cx-sf1.cameron.lan:
+              ansible_host: 192.168.2.69
+            cmch-cx-sf2.cameron.lan:
+              ansible_host: 192.168.3.78
+        gateways:
+          hosts:
+            cmch-cx-gw1.cameron.lan:
+              ansible_host: 192.168.3.88
+            cmch-cx-gw2.cameron.lan:
+              ansible_host: 192.168.3.92
+        fas:
+          hosts:
+            cmch-cx-fas1.cameron.lan:
+              ansible_host: 192.168.3.64
+            cmch-cx-fas2.cameron.lan:
+              ansible_host: 192.168.2.73
+

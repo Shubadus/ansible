@@ -1,0 +1,31 @@
+---
+# Applications:
+# Wyse Management Suite
+# VMware Tools
+# N-Central
+# Visual C++ 2015-2019 Redistributable
+# CrowdStrike
+# Azure Connected Machine Agent
+
+- hosts: wms
+  tasks:
+    # TODO: Separate this as a role
+    - name: Join to Domain
+      ansible.windows.win_domain_membership:
+        dns_domain_name: cameron.lan
+        hostname: cmch-wms
+        domain_admin_user: cshumer@cameron.lan
+        domain_admin_password: ""
+        domain_ou_path: "OU=Virtual,OU=Servers,DC=Cameron,DC=Lan"
+        state: domain
+      register: domain_state
+  
+    - name: Reboot Server
+        ansible.windows.win_reboot:
+        when: domain_state.reboot_required
+
+    - name: Install Wyse Management Suite
+      ansible.windows.win_package:
+        path: "https://www.dell.com/support/home/en-us/drivers/driversdetails?driverid=knny5&oscode=naa&productcode=wyse-wms"
+        product_id: '{A799B9F8-12BD-4450-8CD0-EEB685F8407E}'
+

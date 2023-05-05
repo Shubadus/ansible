@@ -1,0 +1,7 @@
+---
+all:
+  hosts:
+    firewall:
+      ansible_network_os: asa
+      ansible_host: 192.168.255.126
+      ansible_user: camit

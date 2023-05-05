@@ -1,0 +1,14 @@
+---
+- name: ensure server is a domain controller
+  ansible.windows.win_domain_controller:
+    dns_domain_name: cameron.lan
+    domain_admin_user: administrator@cameronmch.com
+    domain_admin_password: ""
+    safe_mode_password: ""
+    state: domain_controller
+    install_dns: true
+  register: dc_promo
+
+- name: reboot after dc_promo
+  ansible.windows.win_reboot:
+  when: dc_promo.reboot_required
