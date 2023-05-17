@@ -4,6 +4,7 @@
     - name: Install xorg
       dnf:
         name: "@base-x"
+      become: true
 
     - name: Install Ibhagwan fork of Picom
       block:
@@ -27,6 +28,7 @@
               - xcb-util-image-devel
               - xcb-util-renderutil-devel
               - xorg-x11-proto-devel
+          become: true
 
         - name: clone repo
           git:
@@ -41,12 +43,14 @@
             chdir: /tmp/ibhagwan-picom
             cmd: meson setup --buildtype=release . build
             creates: /tmp/ibhagwan-picom/build/
+          become: true
 
         - name: build and install
           shell:
             chdir: /tmp/ibhagwan-picom
             cmd: ninja -C build install
             creates: /usr/local/bin/picom
+          become: true
 
     - name: Install tiling window manager packages
       block:
@@ -55,12 +59,14 @@
             name:
               - arandr
               - autorandr
+          become: true
 
         - name: install application launcher
           dnf:
             name:
               - rofi
               - rofi-themes
+          become: true
 
         - name: install logout menu
           block:
@@ -74,11 +80,13 @@
                 src: /tmp/archlinux-logout/usr/
                 dest: /usr/
                 mode: "755"
+              become: true
 
             - name: copy archlinux-logout config file
               copy:
                 src: /tmp/archlinux-logout/etc/
                 dest: /etc/ 
+                become: true
 
         - name: Install Network Manager
           dnf:
@@ -90,6 +98,7 @@
               - NetworkManager-wifi
               - network-manager-applet
               - nm-connection-editor
+          become: true
 
         - name: Install screenlocker
           when: not betterlockscreen.stat.exists
@@ -113,6 +122,7 @@
                   - xcb-util-image-devel
                   - xcb-util-xrm-devel
                   - xset
+              become: true
 
             - name: download i3lock-color
               git:
@@ -124,6 +134,7 @@
                 chdir: /tmp/i3lock-color
                 cmd: "./install-i3lock-color.sh"
                 creates: /usr/bin/i3lock
+              become: true
 
             - name: download betterlockscreen
               git:
@@ -135,6 +146,7 @@
                 src: /tmp/betterlockscreen/betterlockscreen
                 dest: /usr/local/bin/betterlockscreen
                 mode: "755"
+              become: true
 
             - name: download arcolinux-betterlockscreen
               git:
@@ -146,6 +158,7 @@
                 src: /tmp/arcolinux-betterlockscreen/usr/
                 dest: /usr/
                 mode: "755"
+              become: true
       tags: tiling, x11    
   tags: x11
 
@@ -159,13 +172,15 @@
               - swaylock
               - wlroots
               # - waybar
-              - xdg-desktop-portal-wlr
+              # - xdg-desktop-portal-wlr
               - wdisplays
               - wofi
+          become: true
 
         - name: wayland pip
           pip:
             name:
               - pywayland
               - pywlroots
+          become: true
 

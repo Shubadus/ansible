@@ -7,5 +7,6 @@
       - rofi
       - feh
       - xfce4-power-manager
+  become: true
   tags: xorg
     

@@ -3,6 +3,7 @@
   dnf:
     name: python3-pip
     state: present
+  become: true
 
 - name: Install x11 dependencies
   block: 
@@ -15,12 +16,14 @@
           - python3-lxml
           - python3-psutil
           - python3-xcffib
+      become: true
 
     - name: x11 pip
       pip:
         name:
           - pyconfig
           - xkbcommon
+      become: true
 
 - name: install common dependencies
   block:
@@ -31,10 +34,12 @@
           - python3-cffi
           - python3-dbus-next
           - python3-devel
+      become: true
 
 - name: install latest qtile release
   pip:
     name: qtile
+  become: true
 
 - name: create destkop entries
   block:
@@ -48,6 +53,7 @@
           Exec=qtile start -b wayland
           Type=Application
           Keywords=wm;tiling
+      become: true
 
     - name: create x11 session
       copy:
@@ -59,3 +65,4 @@
           Exec=qtile start
           Type=Application
           Keywords=wm;tiling
+        become: true

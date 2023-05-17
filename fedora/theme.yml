@@ -6,6 +6,7 @@
       - lxappearance
       - qt5ct
       - qt5-qtstyleplugins
+  become: true
 
 - name: set qt5ct as qt default
   copy:
@@ -24,6 +25,8 @@
       - breeze-gtk-gtk3
       - breeze-icon-theme
       - plasma-breeze
+  become: true
+
 
 - name: Install Nordic GTK theme
   block:
@@ -36,6 +39,8 @@
       unarchive:
         src: /tmp/Nordic.tar.xz
         dest: /usr/share/themes/
+      become: true
+
 
 - name: Install Nordzy-cyan-dark font
   block:
@@ -48,6 +53,8 @@
       unarchive:
         src: /tmp/Nordzy-cyan-dark.tar.gz
         dest: /usr/share/themes/
+      become: true
+
 
 - name: Install fonts
   when: not noto_nerd_fonts.stat.exists
@@ -56,6 +63,8 @@
       file:
         path: /usr/share/fonts/noto-nerd-fonts
         state: directory
+      become: true
+
 
     - name: Download Noto Font
       get_url:
@@ -66,9 +75,13 @@
       unarchive:
         src: /tmp/Noto.zip
         dest: /usr/share/fonts/noto-nerd-fonts
+      become: true
+
 
 - name: Install Wallpapers
   dnf:
     name:
       - kde-wallpapers
       - sway-wallpapers
+  become: true
+

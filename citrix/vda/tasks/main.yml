@@ -1,0 +1,19 @@
+---
+- hosts: vda
+  vars:
+    software:
+      - Citrix Workspace
+      - EIO Board
+      - Adobe Acrobat Reader DC
+      - MModal Fluency Direct
+      - RightFax
+      - Topaz Signature Pad
+      - Imprivata OneSign Agent
+      - Citrix CVAD
+      - Citrix Workspace
+      - .NET Framework 3.5
+      - Microsoft Visual C++ 2010 Runtime SP1
+      - Microsoft Visual C++ 2012 Runtime
+      - Microsoft Visual C++ 2015 Runetime
+# tasks file for vda
+# DESKTOP-1LNRLOI

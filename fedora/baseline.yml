@@ -1,5 +1,5 @@
 ---
-- name: install tools
+- name: Install tools
   dnf:
     name:
       - dnf-utils # dnf utilities
@@ -8,32 +8,52 @@
       - libreoffice # Office Suite
       - mpv # Lightweight Media Player
       - qbittorrent # Torrent Client
+  become: true
 
-- name: Install Repos
+- name: Install clamav Antivirus
+  dnf:
+    name:
+      - clamav
+      - clamav-freshclam
+      - clamtk
+  become: true
+
+- name: Ensure clamav services are running
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  become: true
+  with_items:
+    - clamav-clamonacc.service 
+    - clamav-freshclam.service
+
+
+- name: Install Flatpak Repos
+  community.general.flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://flathub.org/repo/flathub.flatpakrepo
+    method: system 
+
+- name: Install RPM Fusion Repos
   block:
-    - name: Install Flatpak Repos
-      community.general.flatpak_remote:
-        name: flathub
-        state: present
-        flatpakrepo_url: https://flathub.org/repo/flathub.flatpakrepo
-        method: system 
+  - name: Install RPM Fusion Free
+    dnf:
+      name: "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ansible_distribution_major_version}}.noarch.rpm"
+      disable_gpg_check: true
+    become: true
 
-    - name: Install RPM Fusion Repos
-      block:
-      - name: Install RPM Fusion Free
-        dnf:
-          name: "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ansible_distribution_major_version}}.noarch.rpm"
-          disable_gpg_check: true
+  - name: Install RPM Fusion NonFree
+    dnf:
+      name: "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution_major_version}}.noarch.rpm"
+      disable_gpg_check: true
+    become: true
 
-      - name: Install RPM Fusion NonFree
-        dnf:
-          name: "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution_major_version}}.noarch.rpm"
-          disable_gpg_check: true
-
-    - name: install Flatpak programs
-      community.general.flatpak:
-        name:
-          - com.github.tchx84.Flatseal #Flatpak Permissions GUI Manager
+- name: install Flatpak programs
+  community.general.flatpak:
+    name:
+      - com.github.tchx84.Flatseal #Flatpak Permissions GUI Manager
 
 - name: install archiving tools
   dnf:
@@ -42,12 +62,14 @@
       - zip
       - unrar
       - unzip
+  become: true
 
 - name: install browsers
   dnf:
     name:
       - chromium
       - qutebrowser
+  become: true
 
 - name: install terminals and terminal software
   dnf:
@@ -58,12 +80,14 @@
       - lshw
       - tmux
       - zsh
+  become: true
 
 - name: install terminal editors
   block:
     - name: Install NeoVim
       dnf:
         name: neovim
+      become: true
 
 #     - name: Install LunarVim
 
@@ -78,17 +102,20 @@
           - lshw
           - tmux
           - zsh
+      become: true
 
     - name: install backup software
       dnf:
         name:
           - timeshift
+      become: true
 
     - name: install build software
       dnf:
         name:
           - cmake
           - meson
+      become: true
 
     - name: install file managers and dependencies
       dnf:
@@ -99,18 +126,21 @@
           - gvfs-gphoto2
           - pcmanfm-qt
           - ranger
+      become: true
 
     - name: install power management
       dnf:
         name:
           - tlp
           - xfce4-power-manager
+      become: true
 
     - name: install printing system
       dnf:
         name:
           - cups
           - system-config-printer
+      become: true
 
     - name: install programming langauages, packages, and frameworks
       dnf:
@@ -123,6 +153,7 @@
           - python3-pip
           - python3-poetry
           - rust
+      become: true
 
     - name: install powershell 7
       block:
@@ -130,14 +161,17 @@
           dnf:
             name: https://github.com/PowerShell/PowerShell/releases/download/v7.3.2/powershell-7.3.2-1.rh.x86_64.rpm
             disable_gpg_check: true
+          become: true
 
         - name: install powershell
           dnf:
             name: powershell
+          become: true
 
     - name: install virtualization packages
       dnf:
         name: "@virtualization"
+      become: true
 
     - name: install audio and audio control
       dnf:
@@ -147,16 +181,19 @@
           - pipewire-pulseaudio
           - pavucontrol
           - wireplumber
+      become: true
 
     - name: install misc packages
       dnf:
         name:
           - docker
           - ImageMagick
+      become: true
 
     - name: install pywal via pip
       pip:
         name: pywal
+      become: true
 
     - name: setup AppImageLauncher
       block:
@@ -164,6 +201,7 @@
           dnf:
             name: https://github.com/TheAssassin/AppImageLauncher/releases/download/v2.2.0/appimagelauncher-2.2.0-travis995.0f91801.x86_64.rpm
             disable_gpg_check: true
+          become: true
 
         - name: Create Application directory
           file:
@@ -174,4 +212,5 @@
       dnf:
         name: https://download.teamviewer.com/download/linux/teamviewer.x86_64.rpm
         disable_gpg_check: true
+      become: true
         
