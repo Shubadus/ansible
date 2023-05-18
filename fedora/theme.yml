@@ -9,10 +9,10 @@
   become: true
 
 - name: set qt5ct as qt default
-  copy:
-    dest: "{{ ansible_env.HOME }}/.profile"
-    content: |
-      export QT_QPA_PLATFORMTHEME="qt5ct"
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.bash_profile"
+    search_string: "QT_QPA_PLATFORMTHEME="
+    line: export QT_QPA_PLATFORMTHEME="qt5ct"
 
 - name: Install built-in themes
   dnf:

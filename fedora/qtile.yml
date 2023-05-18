@@ -65,4 +65,4 @@
           Exec=qtile start
           Type=Application
           Keywords=wm;tiling
-        become: true
+      become: true

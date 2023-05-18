@@ -52,6 +52,7 @@
     - name: Update Packages
       dnf:
         update_only: True
+      become: True
 
     - name: Create User Folders
       shell:

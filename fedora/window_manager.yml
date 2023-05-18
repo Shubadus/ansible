@@ -86,7 +86,7 @@
               copy:
                 src: /tmp/archlinux-logout/etc/
                 dest: /etc/ 
-                become: true
+              become: true
 
         - name: Install Network Manager
           dnf:
@@ -172,7 +172,7 @@
               - swaylock
               - wlroots
               # - waybar
-              # - xdg-desktop-portal-wlr
+              - xdg-desktop-portal-wlr
               - wdisplays
               - wofi
           become: true
