@@ -1,0 +1,29 @@
+---
+- hosts: zabbix
+  become: true
+  vars:
+    mysql_enabled_on_startup: true
+    php_packages:
+      - php
+      - php-cli
+      - php-common
+      - php-devel
+      - php-gd
+      - php-mbstring
+      - php-pdo
+      - php-pecl-apcu
+      - php-xml
+    zabbix_api_server_url: zabbix.cameronmch.com
+    zabbix_db_type_long: mysql
+    zabbix_server_database: mysql
+    zabbix_server_database_creation: False
+    zabbix_server_dbhost_run_install: False
+    zabbix_server_dbport: 3306
+    zabbix_server_hostname: cmch-monitor
+    zabbix_server_install_database_client: False
+  roles:
+    - role: geerlingguy.mysql
+    - role: geerlingguy.nginx
+    - role: geerlingguy.php
+    - role: community.zabbix.zabbix_server
+    - role: community.zabbix.zabbix_web

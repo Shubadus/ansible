@@ -1,4 +1,11 @@
 ---
+# - name: add 1Password repo
+#   yum_repository:
+#     name: 1password
+#     description: 1Password RPM Repository
+#     baseurl: https://downloads.1password.com/linux/rpm/stable/\$basearch
+#     gpgkey: https://downloads.1password.com/linux/keys/1password.asc
+
 - name: install work flatpak applications
   community.general.flatpak:
     name:
@@ -7,28 +14,16 @@
       - com.visualstudio.code
       - io.podman_desktop.PodmanDesktop
 
-- name: Install OneDrive CLI for linux
+- name: Install work applications from dnf
   dnf:
     name:
+      - azure-cli
       - onedrive
+      # - 1password
+      # - 1password-cli
   become: true
 
 - name: Install OneDrive GUI
   get_url:
     url: https://github.com/bpozdena/OneDriveGUI/releases/download/v1.0.2/OneDriveGUI-1.0.2-x86_64.AppImage
     dest: "{{ ansible_env.HOME }}/Applications"
-
-# - name: install 1password
-#   block:
-#     - name: add 1Password repo
-#       yum_repository:
-#         name: 1password
-#         description: 1Password RPM Repository
-#         baseurl: https://downloads.1password.com/linux/rpm/stable/\$basearch
-#         gpgkey: https://downloads.1password.com/linux/keys/1password.asc
-#
-#     - name: install 1Password apps
-#       dnf:
-#         name:
-#           - 1password
-#           - 1password-cli

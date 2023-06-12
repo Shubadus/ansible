@@ -6,51 +6,56 @@
         name: "@base-x"
       become: true
 
-    - name: Install Ibhagwan fork of Picom
-      block:
-        - name: install dependencies
-          dnf:
-            name:
-              - dbus-devel
-              - libconfig-devel
-              - libdrm-devel
-              - libev-devel
-              - libX11-devel
-              - libX11-xcb
-              - libXext-devel
-              - libxcb-devel
-              - libGL-devel
-              - libEGL-devel
-              - pcre-devel
-              - pcre2-devel
-              - pixman-devel
-              - uthash-devel
-              - xcb-util-image-devel
-              - xcb-util-renderutil-devel
-              - xorg-x11-proto-devel
-          become: true
 
-        - name: clone repo
-          git:
-            repo: https://github.com/ibhagwan/picom
-            depth: 1
-            dest: /tmp/ibhagwan-picom
-            single_branch: true
-            version: next-rebase
-
-        - name: meson setup
-          shell: 
-            chdir: /tmp/ibhagwan-picom
-            cmd: meson setup --buildtype=release . build
-            creates: /tmp/ibhagwan-picom/build/
-          become: true
-
-        - name: build and install
-          shell:
-            chdir: /tmp/ibhagwan-picom
-            cmd: ninja -C build install
-            creates: /usr/local/bin/picom
-          become: true
+    - name: Install Picom
+      dnf:
+        name: picom
+      become: True
+        #    - name: Install Ibhagwan fork of Picom
+        #      block:
+        #        - name: install dependencies
+        #          dnf:
+        #            name:
+        #              - dbus-devel
+        #              - libconfig-devel
+        #              - libdrm-devel
+        #              - libev-devel
+        #              - libX11-devel
+        #              - libX11-xcb
+        #              - libXext-devel
+        #              - libxcb-devel
+        #              - libGL-devel
+        #              - libEGL-devel
+        #              - pcre-devel
+        #              - pcre2-devel
+        #              - pixman-devel
+        #              - uthash-devel
+        #              - xcb-util-image-devel
+        #              - xcb-util-renderutil-devel
+        #              - xorg-x11-proto-devel
+        #          become: true
+        #
+        #        - name: clone repo
+        #          git:
+        #            repo: https://github.com/ibhagwan/picom
+        #            depth: 1
+        #            dest: /tmp/ibhagwan-picom
+        #            single_branch: true
+        #            version: next-rebase
+        #
+        #        - name: meson setup
+        #          shell: 
+        #            chdir: /tmp/ibhagwan-picom
+        #            cmd: meson setup --buildtype=release . build
+        #            creates: /tmp/ibhagwan-picom/build/
+        #          become: true
+        #
+        #        - name: build and install
+        #          shell:
+        #            chdir: /tmp/ibhagwan-picom
+        #            cmd: ninja -C build install
+        #            creates: /usr/local/bin/picom
+        #          become: true
 
     - name: Install tiling window manager packages
       block:
@@ -64,7 +69,7 @@
         - name: install application launcher
           dnf:
             name:
-              - rofi
+              - rofi-wayland
               - rofi-themes
           become: true
 
@@ -161,26 +166,4 @@
               become: true
       tags: tiling, x11    
   tags: x11
-
-- name: install wayland and tools
-  block:
-    - name: install qtile dependencies
-      block:
-        - name: wayland dnf
-          dnf:
-            name:
-              - swaylock
-              - wlroots
-              # - waybar
-              - xdg-desktop-portal-wlr
-              - wdisplays
-              - wofi
-          become: true
-
-        - name: wayland pip
-          pip:
-            name:
-              - pywayland
-              - pywlroots
-          become: true
 

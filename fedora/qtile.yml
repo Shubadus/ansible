@@ -5,6 +5,19 @@
     state: present
   become: true
 
+- name: install common dependencies (DNF)
+  dnf:
+    name:
+      - pango
+      - python3-devel
+      - python3-cffi
+      - python3-dbus-next
+      - python3-devel
+  become: true
+  tags:
+    - qtile-wayland
+    - qtile-x11
+
 - name: Install x11 dependencies
   block: 
     - name: x11 dnf
@@ -12,7 +25,6 @@
         name:
           - libxkbcommon-devel
           - picom
-          - python3-devel
           - python3-lxml
           - python3-psutil
           - python3-xcffib
@@ -24,22 +36,45 @@
           - pyconfig
           - xkbcommon
       become: true
+  tags: qtile-x11
 
-- name: install common dependencies
+- name: install wayland and tools
   block:
-    - name: install common dependencies (DNF)
-      dnf:
-        name:
-          - pango
-          - python3-cffi
-          - python3-dbus-next
-          - python3-devel
+    - name: install qtile dependencies
+      block:
+        - name: wayland dnf
+          dnf:
+            name:
+              - swaylock
+              - wlroots
+              # - waybar
+              - xdg-desktop-portal-wlr
+              - wdisplays
+              - wofi
+          become: true
+
+        - name: wayland pip
+          pip:
+            name:
+              - pywayland
+              - pywlroots
+          become: true
+  tags: qtile-wayland
+
+- name: Install qtile from Copr repo
+  block:
+    - name: Enable Copr repo
+      community.general.copr:
+        name: frostyx/qtile
       become: true
 
-- name: install latest qtile release
-  pip:
-    name: qtile
-  become: true
+    - name: Install qtile
+      dnf:
+        name: qtile
+      become: true
+  tags:
+    - qtile-wayland
+    - qtile-x11
 
 - name: create destkop entries
   block:
@@ -54,6 +89,7 @@
           Type=Application
           Keywords=wm;tiling
       become: true
+      tags: qtile-wayland
 
     - name: create x11 session
       copy:
@@ -66,3 +102,4 @@
           Type=Application
           Keywords=wm;tiling
       become: true
+      tags: qtile-x11

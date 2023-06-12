@@ -128,11 +128,26 @@
           - ranger
       become: true
 
-    - name: install power management
+    - name: Install power and thermal management
       dnf:
         name:
           - tlp
+
           - xfce4-power-manager
+      become: true
+
+    - name: Enable tlp power management
+      systemd:
+        name: tlp.service
+        state: started
+        enabled: true
+      become: true
+        
+    - name: Enable thermald service
+      systemd:
+        name: thermald.service
+        state: started
+        enabled: true
       become: true
 
     - name: install printing system
