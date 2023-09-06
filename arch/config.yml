@@ -1,0 +1,33 @@
+---
+- name: Set variables
+  set_fact:
+    git_folder: "{{ ansible_env.HOME }}/git"
+    config_folder: "{{ ansible_env.HOME }}/.config"
+
+- name: Ensure git folder exists in HOME Directory
+  file:
+    path: "{{ git_folder }}"
+    state: directory
+
+- name: Download Dotfiles
+  git:
+    repo: https://github.com/Shubadus/dotfiles.git
+    dest: "{{ git_folder }}/dotfiles"
+
+- name: Collect installed applications
+  package_facts:
+    manager: auto
+
+- name: Add Dotfiles
+  block:
+    - name: "Check if config folder for qtile exists"
+      stat:
+        path: "{{ config_folder }}/qtile"
+      register: qtile_config
+
+    - name: Link config
+      file:
+        src: "{{ git_folder }}/qtile"
+        dest: "{{ config_folder }}/qtile"
+        state: link
+      when: not qtile_config.stat.exists

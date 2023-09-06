@@ -1,0 +1,7 @@
+[{{ item.name }}]
+comment = {{ item.comment | default(item.name)}}
+path = {{ item.path }}
+browseable = {{ item.browsable | default("yes") }}
+public = {{ item.public | default("no") }}
+valid users = @"{{ domain.name }}+Domain Users"
+admin users = @"{{ domain.name }}+Domain Admins",@"{{ domain.name }}+Enterprise Admins",@"{{ domain.name }}+Server-Admins",

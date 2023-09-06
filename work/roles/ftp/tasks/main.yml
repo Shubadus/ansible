@@ -1,0 +1,8 @@
+---
+# tasks file for ftp
+- import_tasks: win_ftp.yml 
+  when: ansible_os_family == "Windows"
+
+- import_tasks: ftp.yml
+  when: not ansible_os_family == "Windows"
+

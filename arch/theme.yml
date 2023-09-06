@@ -1,0 +1,34 @@
+---
+- name: set qt5ct as qt default
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.bash_profile"
+    search_string: "QT_QPA_PLATFORMTHEME="
+    line: export QT_QPA_PLATFORMTHEME="gtk2"
+
+- name: set qt5ct as qt default
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.bash_profile"
+    search_string: "QT_STYLE_OVERRIDE="
+    line: export QT_STYLE_OVERRIDE="gtk2"
+
+- name: Install built-in themes
+  become: true
+  pacman:
+    name:
+      - adwaita-cursors
+      - adwaita-icon-theme
+      - breeze
+      - breeze-cursor-theme
+      - breeze-gtk
+      - breeze-grub
+      - breeze-icons
+      - libadwaita
+  when: 
+
+- name: Install Wallpapers
+  become: true
+  pacman:
+    name:
+      - archlinux-wallpaper
+      - plasma-workspace-wallpapers
+

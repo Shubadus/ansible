@@ -1,0 +1,17 @@
+---
+- name: install work flatpak applications
+  community.general.flatpak:
+    name:
+      - com.microsoft.Edge
+      - com.github.IsmaelMartinez.teams_for_linux
+      - com.visualstudio.code
+      - io.podman_desktop.PodmanDesktop
+
+- name: Install work applications from package manager
+  become: true
+  aur:
+    name:
+      - onedrive-abraunegg
+      - onedrivegui
+      - 1password
+      - 1password-cli

@@ -11,3 +11,14 @@ all:
       hosts:
         cmch-monitor.cameron.lan:
           ansible_user: cameron-admin
+
+    ftp:
+      hosts:
+        cmch-ftp.cameron.lan:
+          # ansible_connection: winrm
+          ansible_user: cody-admin
+          # ansible_winrm_server_cert_validation: ignore
+          # ansible_winrm_transport: credssp
+          remote_tmp: C:\users\cody-admin\tmp
+          ansible_shell_type: powershell
+          shell_type: powershell

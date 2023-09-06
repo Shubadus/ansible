@@ -1,0 +1,27 @@
+---
+- name: Install qtile
+  become: true
+  pacman:
+    name: qtile
+
+- name: Install xorg packages
+  become: true
+  pacman:
+    name:
+      - autorandr
+      - arandr
+      - dunst
+      - rofi
+      - lightdm-gtk-greeter
+      - lightdm-gtk-greeter-settings
+      - network-manager-applet
+      - nitrogen
+      - xfce4-power-manager
+  tags: xorg
+
+- name: Install xorg packages AUR
+  aur:
+    name:
+      - arcolinux-betterlockscreen
+      - arcolinux-logout
+

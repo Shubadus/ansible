@@ -1,0 +1,103 @@
+- hosts: ftp
+  vars:
+    domain:
+      hostname: cmch-ftp
+      name: cameron.lan
+      ou: ou=virtual,ou=servers,dc=cameron,dc=lan
+    share_users:
+      - username: mie
+        password: Winter18
+        path: E:\shares\mie
+      - username: parkview
+        password: p@rkv1ew
+        path: E:\shares\parkview
+      - username: veoci
+        password: 7n@K4Vrn9Jau26BEUWvM
+        path: E:\shares\veoci
+    shares:
+      - name: MIE SFTP Folders
+        path: E:\shares\mie
+        full: sa-beapps,sa-mirth,domain admins,jonathan-admin
+      - name: Parkview SFTP Folders
+        path: E:\shares\parkview
+        full: sa-beapps,sa-mirth,sa-rh,leck,wstamper,domain admins,jonathan-admin
+      - name: inbound 
+        path: E:\shares\parkview\inbound
+      - name: 835
+        path: E:\shares\parkview\inbound\835
+      - name: 837
+        path: E:\shares\parkview\inbound\837
+      - name: CRD
+        path: E:\shares\parkview\inbound\crd
+      - name: DEP-OUTPUT
+        path: E:\shares\parkview\inbound\dep-output
+      - name: HB
+        path: E:\shares\parkview\inbound\hb
+      - name: HELP
+        path: E:\shares\parkview\inbound\help
+      - name: PB
+        path: E:\shares\parkview\inbound\pb
+      - name: RevSpring
+        path: E:\shares\parkview\inbound\revspring
+      - name: outbound
+        path: E:\shares\parkview\outbound
+      - name: 835_for_CPSI
+        full: sa-beapps,domain admins,kparsell,jonathan-admin
+        share: true
+        path: E:\shares\parkview\outbound\835_for_cpsi
+      - name: 837
+        path: E:\shares\parkview\outbound\837
+      - name: Circlelink
+        path: E:\shares\parkview\outbound\circlelink
+      - name: Collection Agency Reports
+        path: E:\shares\parkview\outbound\collection_agency_reports
+      - name: Craneware
+        path: E:\shares\parkview\outbound\craneware
+      - name: HB
+        path: E:\shares\parkview\outbound\hb
+      - name: HELP
+        path: E:\shares\parkview\outbound\help
+      - name: HIM
+        path: E:\shares\parkview\outbound\him
+      - name: IHHA
+        full: sa-beapps,domain admins,jonathan-admin
+        share: true
+        path: E:\shares\parkview\outbound\him\ihha
+      - name: InfectionCtl
+        path: E:\shares\parkview\outbound\infectionctl
+      - name: Medicare Bad Debt
+        path: E:\shares\parkview\outbound\medicare_bad_debt
+      - name: Midas
+        path: E:\shares\parkview\outbound\midas
+      - name: PB
+        path: E:\shares\parkview\outbound\pb
+      - name: Pharmacy
+        share: true
+        full: sa-beapps,sa-rh,domain admins
+        path: E:\shares\parkview\outbound\pharmacy
+      - name: PressGaney
+        path: E:\shares\parkview\outbound\pressganey
+      - name: QRDA-I
+        path: E:\shares\parkview\outbound\qrda-i
+      - name: Quantros
+        share: true
+        full: sa-beapps,sa-rh,domain admins
+        path: E:\shares\parkview\outbound\quantros
+      - name: Reimb Analysis Reports - EPIC
+        path: E:\shares\parkview\outbound\remib-analysis-reports-epic
+      - name: Strata
+        path: E:\shares\parkview\outbound\Strata
+      - name: OUTBOUND TO RELAYHEALTH - PICKUP
+        share: true
+        full: sa-beapps,domain admins,jonathan-admin
+        path: E:\shares\outbound-to-relayhealth-pickup
+      - name: CIS
+        share: true
+        full: sa-beapps,domain admins,jonathan-admin
+        path: E:\shares\cis
+      - name: Veoci SFTP
+        path: E:\shares\veoci
+        full: domain admins,server-admins
+
+  roles:
+    - role: ftp

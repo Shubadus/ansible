@@ -2,7 +2,6 @@
 - hosts: zabbix
   become: true
   vars:
-    mysql_enabled_on_startup: true
     php_packages:
       - php
       - php-cli
@@ -16,14 +15,27 @@
     zabbix_api_server_url: zabbix.cameronmch.com
     zabbix_db_type_long: mysql
     zabbix_server_database: mysql
-    zabbix_server_database_creation: False
-    zabbix_server_dbhost_run_install: False
+    zabbix_server_install_database_client: false
     zabbix_server_dbport: 3306
     zabbix_server_hostname: cmch-monitor
-    zabbix_server_install_database_client: False
+    zabbix_server_mysql_login_user: cameron-admin 
+    zabbix_server_mysql_login_password: TPNbg3WUGq34J@_uC76zBjhXv
+    mysql_enabled_on_startup: true
+    # mysql_user_home: /home/cameron-admin/
+    # mysql_user_name: cameron-admin 
+    # mysql_user_password: TPNbg3WUGq34J@_uC76zBjhXv
+    # mysql_root_home: /home/cameron-admin/
+    mysql_root_name: cameron-admin 
+    mysql_root_password: TPNbg3WUGq34J@_uC76zBjhXv
+    # mysql_root_password_update: true
+    mysql_users:
+      - name: cameron-admin
+        password: TPNbg3WUGq34J@_uC76zBjhXv
+
   roles:
     - role: geerlingguy.mysql
-    - role: geerlingguy.nginx
+      become: true
+    - role: geerlingguy.apache
     - role: geerlingguy.php
     - role: community.zabbix.zabbix_server
     - role: community.zabbix.zabbix_web

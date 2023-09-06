@@ -1,0 +1,165 @@
+---
+- name: Create the `aur_builder` user
+  become: true
+  ansible.builtin.user:
+    name: aur_builder
+    create_home: yes
+    group: wheel
+
+- name: Allow the `aur_builder` user to run `sudo pacman` without a password
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/11-install-aur_builder
+    line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
+    create: yes
+    mode: 0644
+    validate: 'visudo -cf %s'
+
+- name: Install tools
+  become: true
+  pacman:
+    name:
+      - flatpak # System Agnostic Package Management
+      - filelight # Disk Usage Display
+      - libreoffice # Office Suite
+      - mpv # Lightweight Media Player
+      - qbittorrent # Torrent Client
+
+- name: Install Flatpak programs
+  community.general.flatpak:
+    name:
+      - com.github.tchx84.Flatseal #Flatpak Permissions GUI Manager
+
+- name: Install archiving tools
+  become: true
+  pacman:
+    name:
+      - ark # Archive Manager
+      - zip
+      - unrar
+      - unzip
+
+- name: Install browsers
+  become: true
+  pacman:
+    name:
+      - brave-bin
+      - chromium
+      - qutebrowser
+
+- name: Install terminals and terminal software
+  become: true
+  pacman:
+    name:
+      - alacritty
+      - bash-completion
+      - btop
+      - git
+      - lshw
+      - polkit-gnome
+      - tmux
+      - zsh
+
+- name: Install NeoVim
+  become: true
+  pacman:
+    name: neovim
+
+- name: Install backup software
+  become: true
+  pacman:
+    name:
+      - timeshift
+
+- name: Install build software
+  become: true
+  pacman:
+    name:
+      - cmake
+      - meson
+
+- name: Install file managers and dependencies
+  become: true
+  pacman:
+    name:
+      - gvfs
+      - gvfs-smb
+      - gvfs-mtp
+      - gvfs-gphoto2
+      - pcmanfm-qt
+      - ranger
+
+- name: Install power and thermal management
+  become: true
+  pacman:
+    name:
+      - tlp
+      - thermald 
+      - xfce4-power-manager
+
+- name: Enable tlp power management
+  become: true
+  systemd:
+    name: tlp.service
+    state: started
+    enabled: true
+    
+- name: Enable thermald service
+  become: true
+  systemd:
+    name: thermald.service
+    state: started
+    enabled: true
+
+- name: Install printing system
+  pacman:
+    name:
+      - cups
+      - system-config-printer
+  become: true
+
+- name: Install programming langauages, packages, and frameworks
+  become: true
+  pacman:
+    name:
+      - go
+      - gcc
+      - nodejs
+      - python-pip
+      - python-poetry
+      - rustup
+
+- name: Install audio and audio control
+  become: true
+  pacman:
+    name: 
+      - pipewire
+      - pipewire-alsa
+      - pipewire-pulse
+      - pavucontrol
+      - wireplumber
+
+- name: Install Virtualization
+  become: true
+  pacman:
+    - dnsmasq
+    - iptables-nft
+    - libvirt
+    - qemu-desktop
+    - swtpm
+    - virt-manager
+
+- name: Enable libvirt daemons
+  become: true
+  systemd:
+    name: libvirtd
+    state: started
+    enabled: true
+
+- name: Install misc packages
+  become: true
+  pacman:
+    name:
+      - docker
+      - imagemagick
+

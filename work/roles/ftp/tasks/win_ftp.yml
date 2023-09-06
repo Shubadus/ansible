@@ -1,0 +1,72 @@
+---
+- name: Install terminal text editors
+  chocolatey.chocolatey.win_chocolatey:
+    name:
+      - vim
+      - nano
+  async: 1800
+
+- name: Join Windows AD Domain
+  microsoft.ad.membership:
+    dns_domain_name: "{{ domain.name }}"
+    domain_ou_path: "{{ domain.ou }}"
+    hostname: "{{ domain.hostname }}"
+    state: domain
+    domain_admin_user: ""
+    domain_admin_password: ""
+  register: domain_state
+
+- name: Install OpenSSH
+  ansible.windows.win_powershell:
+    script: |
+      $OpenSSH = Get-WindowsCapability -Name OpenSSH.Server -Online
+      if ($OpenSSH.State -ne "Installed") {
+        $OpenSSH | Add-WindowsCapability -Online
+      }
+      else {
+        $Ansible.Changed = $false
+      }
+
+- name: Ensure OpenSSH daemon service is set to automatic
+  ansible.windows.win_service:
+    name: sshd
+    start_mode: auto
+    state: started
+
+- name: Install Windows Updates
+  win_updates:
+    category_names:
+      - SecurityUpdates
+      - CriticalUpdates
+      - UpdateRollups
+  register: update_state
+  async: 1800
+
+- name: Setup local share users
+  include_tasks: win_ftp_local_users.yml
+  loop: "{{ share_users }}"
+  loop_control:
+    label: "{{ item.username }}"
+  when: share_users is defined
+
+- name: Create Share Directories
+  include_tasks: win_ftp_shares.yml
+  loop: "{{ shares }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Set sshd configuration file
+  ansible.windows.win_template:
+    src: win_sshd_config.j2
+    dest: C:\ProgramData\ssh\sshd_config
+  register: sshd_config
+
+- name: Restart SSH Server
+  ansible.windows.win_service:
+    name: sshd
+    state: restarted
+  when: sshd_config.changed
+
+- name: Reboot server if required
+  ansible.windows.win_reboot:
+  when: domain_state.reboot_required or update_state.reboot_required

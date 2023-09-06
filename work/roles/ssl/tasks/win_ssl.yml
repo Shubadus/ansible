@@ -1,0 +1,19 @@
+---
+- name: Ensure Temp directory exists
+  ansible.windows.win_file:
+    path: "{{ temp_path }}" 
+    state: directory
+
+- name: Copy ssl cert to remote machine
+  ansible.windows.win_copy:
+    src: "files/{{ certname }}"
+    dest: "{{ temp_path }}{{ certname }}"
+
+- name: Import ssl cert
+  ansible.windows.win_certificate_store:
+    path: "{{ temp_path }}{{ certname }}"
+    store_location: LocalMachine
+    store_name: Root
+  become: true
+  become_method: runas
+  become_user: SYSTEM

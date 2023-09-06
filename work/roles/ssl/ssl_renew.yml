@@ -1,0 +1,11 @@
+---
+hosts: ssl
+vars:
+  temp_path: C:\Temp\
+  certname: cameronmch.com.cer
+tasks:
+  - ansible.builtin.include: win_ssl.yml
+    when: ansible_os_family == "Windows"
+
+  - ansible.builtin.included: ssl.yml
+    when: not ansible_os_family == "Windows"

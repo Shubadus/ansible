@@ -1,0 +1,10 @@
+Subsystem	sftp	sftp-server.exe
+
+{% for user in share_users %}
+Match User {{ user.username }}
+	ChrootDirectory {{ user.path }}
+
+{% endfor %}
+Match Group administrators
+       AuthorizedKeysFile __PROGRAMDATA__/ssh/administrators_authorized_keys
+

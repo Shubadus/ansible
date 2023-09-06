@@ -38,17 +38,17 @@
 
 - name: Install RPM Fusion Repos
   block:
-  - name: Install RPM Fusion Free
-    dnf:
-      name: "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ansible_distribution_major_version}}.noarch.rpm"
-      disable_gpg_check: true
-    become: true
+    - name: Install RPM Fusion Free
+      dnf:
+        name: "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ansible_distribution_major_version}}.noarch.rpm"
+        disable_gpg_check: true
+      become: true
 
-  - name: Install RPM Fusion NonFree
-    dnf:
-      name: "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution_major_version}}.noarch.rpm"
-      disable_gpg_check: true
-    become: true
+    - name: Install RPM Fusion NonFree
+      dnf:
+        name: "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ansible_distribution_major_version}}.noarch.rpm"
+        disable_gpg_check: true
+      become: true
 
 - name: install Flatpak programs
   community.general.flatpak:

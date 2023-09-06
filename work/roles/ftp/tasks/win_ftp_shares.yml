@@ -1,0 +1,28 @@
+---
+- name: Create share folder in share directory
+  ansible.windows.win_file:
+    path: "{{ item.path }}"
+    state: directory
+  when: item.path is defined
+
+- name: Add NTFS Permissions to share folder
+  ansible.windows.win_acl:
+    user: "{{ user }}"
+    path: "{{ item.path }}"
+    rights: FullControl
+    inherit: ContainerInherit
+    type: allow
+  when: item.full is defined
+  loop: "{{ item.full | split(',') }}"
+  loop_control: 
+    loop_var: user
+
+# By default, we'll set the local users to have read/write access only.
+- name: Share the folders
+  ansible.windows.win_share:
+    name: "{{ item.name }}"
+    path: "{{ item.path }}"
+    change: "{{ item.username | default(omit)}}"
+    full: "{{ item.full | default('Administrators') }}"
+    list: "{{ item.list | default(omit)}}"
+  when: item.share is defined or item.username is defined

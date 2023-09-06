@@ -1,0 +1,119 @@
+---
+- name: Install Samba and AD Domain Join Dependencies
+  become: true
+  dnf:
+    name:
+      - adcli
+      - krb5-workstation
+      - oddjob
+      - oddjob-mkhomedir
+      - openldap-clients
+      - realmd
+      - samba-common
+      - samba-common-tools
+      - sssd
+      - sssd-tools
+
+- name: Add the server admins AD group to the sudoers directory
+  become: true
+  lineinfile:
+    create: true
+    path: /etc/sudoers.d/ad_sudoers
+    search_string: "{{ item }}"
+    line: |
+      %{{ domain.name | upper() }}\{{ item }} ALL=(ALL:ALL) ALL
+  loop: "{{ domain.admin_groups }}"
+  when: domain.admin_groups is defined
+
+- name: Configure hosts file
+  become: true
+  lineinfile:
+    path: /etc/hosts
+    search_string: "{{ domain.dc.name }}.{{ domain.name }}"
+    line: |
+      {{ domain.dc.ip_address }} {{ domain.dc.name }}.{{ domain.name }} {{ domain.dc.name }}
+  when: domain.name is defined
+
+- name: Write template files
+  become: true
+  block:
+    - name: Configure sshd_config
+      template:
+        src: sshd_config.j2
+        dest: /etc/ssh/sshd_config
+        owner: root
+        group: root
+        mode: 0600
+
+    - name: Configure krb5.conf
+      template:
+        src: krb5.j2
+        dest: /etc/krb5.conf
+        owner: root
+        group: root
+        mode: 0600
+
+    - name: Create krb5.conf.d directory
+      file:
+        path: /etc/krb5.conf.d
+        state: directory
+        owner: root
+        group: root
+        mode: 755
+
+    - name: Configure sssd.conf
+      template:
+        src: sssd.conf.j2
+        dest: /etc/sssd/sssd.conf
+        owner: root
+        group: root
+        mode: 0600
+
+- name: Joining the AD realm #(creating AD computer account and updating /etc/krb5.keytab)
+  become: true
+  shell: echo "{{ password }}" | adcli join --stdin-password {{ domain.name }} -U {{ domain.join_username }} --domain-ou={{ domain.ou }}
+
+- name: Creating AD server admin group
+  become: true
+  shell: echo "{{ password }}" | adcli create-group ADMIN_{{ ansible_hostname }} --stdin-password --domain={{ domain.name }} --description='Admin group for {{ ansible_hostname }} server' --domain-ou={{ domain.ou }} -U {{ domain.join_username }}
+  register: group_result
+  failed_when: group_result.rc != 0 and group_result.rc != 5
+
+- name: Ensure samba.conf.d exists
+  become: true
+  file:
+    path: /etc/samba/smb.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: 755
+
+- name: Create Samba Shares and configurations
+  include_tasks: samba_shares.yml
+  loop: "{{ shares }}"
+
+- name: Configure PAM/SSHD to use SSSD
+  become: true
+  shell: authselect select sssd with-mkhomedir --force
+
+- name: Enabling oddjobd service
+  become: true
+  systemd:
+    name: oddjobd.service
+    enabled: yes
+    state: started
+
+- name: Restarting SSSD
+  become: true
+  systemd:
+    name: sssd
+    enabled: yes
+    state: restarted
+
+- name: Restarting SSHD
+  become: true
+  systemd:
+    name: sshd
+    enabled: yes
+    state: restarted
+

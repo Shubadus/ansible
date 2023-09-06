@@ -1,0 +1,18 @@
+---
+- name: Configure share configs
+  become: true
+  template:
+    src: smb_share.conf.j2
+    dest: "/etc/samba/smb.conf.d/{{ item.name }}.conf"
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Create Share Directory
+  become: true
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 755
