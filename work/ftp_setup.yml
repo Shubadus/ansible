@@ -6,13 +6,10 @@
       ou: ou=virtual,ou=servers,dc=cameron,dc=lan
     share_users:
       - username: mie
-        password: Winter18
         path: E:\shares\mie
       - username: parkview
-        password: p@rkv1ew
         path: E:\shares\parkview
       - username: veoci
-        password: 7n@K4Vrn9Jau26BEUWvM
         path: E:\shares\veoci
     shares:
       - name: MIE SFTP Folders
