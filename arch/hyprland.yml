@@ -1,0 +1,58 @@
+---
+- name: Install Hyprland 
+  become: true
+  become_user: aur_builder
+  kewlfft.aur.aur:
+    name:
+      - hyprland
+
+- name: Install additional Hyprland packages
+  become: true
+  become_user: aur_builder
+  kewlfft.aur.aur:
+    name:
+      - hyprbars-git
+      - pyprland
+      - waybar-hyprland-git
+  tags: xorg
+
+- name: Install wayland packages
+  become: true
+  become_user: aur_builder
+  kewlfft.aur.aur:
+    name:
+      - azote
+      - dunst
+      - imv
+      - gtklock
+      - grim
+      - kanshi
+      - nwg-look
+      - slurp
+      - swaybg
+      - swayidle
+      - wlroots
+      - wl-clipboard
+      - wl-logout
+      - wlr-randr
+      - wofi
+
+- name: Install Hyprland Contributions
+  block: 
+    - name: clone repo
+      git:
+        repo: https://github.com/hyprwm/contrib
+        dest: /tmp/hyprwm-contrib
+
+    # - name: Install Try_Swap_Workspace
+    #   become: true
+    #   community.general.make:
+    #     chdir: /tmp/hyprwm-contrib/try_swap_workspace
+    #     target: install
+
+    - name: Install Grimblast
+      become: true
+      community.general.make:
+        chdir: /tmp/hyprwm-contrib/grimblast
+        target: install
+

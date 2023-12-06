@@ -33,15 +33,6 @@
     start_mode: auto
     state: started
 
-- name: Install Windows Updates
-  win_updates:
-    category_names:
-      - SecurityUpdates
-      - CriticalUpdates
-      - UpdateRollups
-  register: update_state
-  async: 1800
-
 - name: Setup local share users
   include_tasks: win_ftp_local_users.yml
   loop: "{{ share_users }}"
@@ -49,11 +40,11 @@
     label: "{{ item.username }}"
   when: share_users is defined
 
-- name: Create Share Directories
-  include_tasks: win_ftp_shares.yml
-  loop: "{{ shares }}"
-  loop_control:
-    label: "{{ item.name }}"
+# - name: Create Share Directories
+#   include_tasks: win_ftp_shares.yml
+#   loop: "{{ shares }}"
+#   loop_control:
+#     label: "{{ item.name }}"
 
 - name: Set sshd configuration file
   ansible.windows.win_template:
@@ -66,6 +57,24 @@
     name: sshd
     state: restarted
   when: sshd_config.changed
+
+# - name: Wait for asynchronous job to end
+  # ansible.builtin.async_status:
+    # jid: '{{ update_state.ansible_job_id }}'
+  # register: job_result
+  # until: job_result.finished
+  # retries: 100
+  # delay: 10
+
+- name: Install Windows Updates
+  win_updates:
+    category_names:
+      - SecurityUpdates
+      - CriticalUpdates
+      - UpdateRollups
+  register: update_state
+  # async: 1800
+  # poll: 0
 
 - name: Reboot server if required
   ansible.windows.win_reboot:

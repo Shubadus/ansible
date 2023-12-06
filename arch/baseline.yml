@@ -29,6 +29,11 @@
   community.general.flatpak:
     name:
       - com.github.tchx84.Flatseal #Flatpak Permissions GUI Manager
+      # - com.github.d4nj1.tlpui
+      - com.bitwarden.desktop
+      - io.podman_desktop.PodmanDesktop
+      - md.obsidian.Obsidian
+      - org.remmina.Remmina
 
 - name: Install archiving tools
   become: true
@@ -43,9 +48,26 @@
   become: true
   pacman:
     name:
-      - brave-bin
       - chromium
       - qutebrowser
+
+- name: Install browsers (AUR)
+  become: true
+  become_user: aur_builder
+  kewlfft.aur.aur:
+    name:
+      - brave-bin
+
+- name: Install AUR packages
+  become: true
+  become_user: aur_builder
+  kewlfft.aur.aur:
+    name:
+      - appimagelauncher
+      - slimbookbattery
+      # - slimbookintelcontroller
+      - webapp-manager
+      - ueberzugpp
 
 - name: Install terminals and terminal software
   become: true
@@ -58,7 +80,6 @@
       - lshw
       - polkit-gnome
       - tmux
-      - zsh
 
 - name: Install NeoVim
   become: true
@@ -68,8 +89,7 @@
 - name: Install backup software
   become: true
   pacman:
-    name:
-      - timeshift
+    name: timeshift
 
 - name: Install build software
   become: true
@@ -80,14 +100,26 @@
 
 - name: Install file managers and dependencies
   become: true
-  pacman:
+  become_user: aur_builder
+  kewlfft.aur.aur:
     name:
       - gvfs
       - gvfs-smb
       - gvfs-mtp
       - gvfs-gphoto2
-      - pcmanfm-qt
       - ranger
+      - thunar
+      - thunar-archive-plugin
+      - thunar-media-tags-plugin
+      - thunar-vcs-plugin
+      - thunar-volman
+      - ueberzugpp # for image viewing in ranger
+
+- name: ensure power-profiles-daemon is removed
+  become: true
+  pacman:
+    name: power-profiles-daemon
+    state: absent
 
 - name: Install power and thermal management
   become: true
@@ -96,20 +128,6 @@
       - tlp
       - thermald 
       - xfce4-power-manager
-
-- name: Enable tlp power management
-  become: true
-  systemd:
-    name: tlp.service
-    state: started
-    enabled: true
-    
-- name: Enable thermald service
-  become: true
-  systemd:
-    name: thermald.service
-    state: started
-    enabled: true
 
 - name: Install printing system
   pacman:
@@ -142,19 +160,13 @@
 - name: Install Virtualization
   become: true
   pacman:
-    - dnsmasq
-    - iptables-nft
-    - libvirt
-    - qemu-desktop
-    - swtpm
-    - virt-manager
-
-- name: Enable libvirt daemons
-  become: true
-  systemd:
-    name: libvirtd
-    state: started
-    enabled: true
+    name:
+      - dnsmasq
+      - iptables-nft
+      - libvirt
+      - qemu-desktop
+      - swtpm
+      - virt-manager
 
 - name: Install misc packages
   become: true
@@ -162,4 +174,17 @@
     name:
       - docker
       - imagemagick
+
+- name: Install xdg-desktop-portal(s)
+  become: true
+  pacman:
+    name:
+      - xdg-desktop-portal
+      - xdg-desktop-portal-gtk
+
+- name: Ensure xdg-desktop-portal-gnome is absent
+  become: true
+  pacman:
+    name: xdg-desktop-portal-gnome
+    state: absent
 

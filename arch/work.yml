@@ -5,13 +5,14 @@
       - com.microsoft.Edge
       - com.github.IsmaelMartinez.teams_for_linux
       - com.visualstudio.code
-      - io.podman_desktop.PodmanDesktop
 
 - name: Install work applications from package manager
   become: true
-  aur:
+  become_user: aur_builder
+  kewlfft.aur.aur:
     name:
       - onedrive-abraunegg
       - onedrivegui
       - 1password
       - 1password-cli
+

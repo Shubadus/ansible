@@ -1,4 +1,13 @@
 ---
+- name: Install qtile dependencies
+  become: true
+  become_user: aur_builder
+  kewlfft.aur.aur:
+    name:
+      - python-dbus-next
+      - python-iwlib
+      - qtile-extras
+
 - name: Install qtile
   become: true
   pacman:
@@ -8,20 +17,41 @@
   become: true
   pacman:
     name:
+      - i3lock
       - autorandr
       - arandr
       - dunst
-      - rofi
+      - feh
       - lightdm-gtk-greeter
       - lightdm-gtk-greeter-settings
-      - network-manager-applet
-      - nitrogen
-      - xfce4-power-manager
+      - picom
+      - rofi
+      - xss-lock
   tags: xorg
 
 - name: Install xorg packages AUR
-  aur:
+  become: true
+  become_user: aur_builder
+  kewlfft.aur.aur:
     name:
-      - arcolinux-betterlockscreen
       - arcolinux-logout
+
+- name: Install wayland packages
+  become: true
+  become_user: aur_builder
+  kewlfft.aur.aur:
+    name:
+      - dunst
+      - imv
+      - gtklock
+      - kanshi
+      - nwg-look
+      - rofi
+      - swaybg
+      - swayidle
+      - swaylock
+      - wlroots
+      - wl-clipboard
+      - wl-logout
+      - wlr-randr
 

@@ -1,8 +1,9 @@
 ---
 hosts: ssl
 vars:
-  temp_path: C:\Temp\
+  temp_path: C:\Temp
   certname: cameronmch.com.cer
+  3m_crs_cert_path: C:\3mhis\3mws\ssl\ 
 tasks:
   - ansible.builtin.include: win_ssl.yml
     when: ansible_os_family == "Windows"

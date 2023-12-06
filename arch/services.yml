@@ -1,0 +1,35 @@
+---
+- name: Enable tlp power management
+  become: true
+  systemd:
+    name: tlp.service
+    state: started
+    enabled: true
+
+- name: Enable thermald service
+  become: true
+  systemd:
+    name: thermald.service
+    state: started
+    enabled: true
+
+- name: Enable libvirt daemons
+  become: true
+  systemd:
+    name: libvirtd
+    state: started
+    enabled: true
+
+- name: Ensure docker service is enabled
+  become: true
+  systemd:
+    name: docker
+    enabled: true
+
+- name: Ensure podman service is enabled
+  become: true
+  systemd:
+    name: podman
+    state: started
+    enabled: true
+

@@ -14,13 +14,9 @@
     repo: https://github.com/Shubadus/dotfiles.git
     dest: "{{ git_folder }}/dotfiles"
 
-- name: Collect installed applications
-  package_facts:
-    manager: auto
-
 - name: Add Dotfiles
   block:
-    - name: "Check if config folder for qtile exists"
+    - name: Check if config folder for qtile exists
       stat:
         path: "{{ config_folder }}/qtile"
       register: qtile_config
@@ -31,3 +27,32 @@
         dest: "{{ config_folder }}/qtile"
         state: link
       when: not qtile_config.stat.exists
+
+- name: Add .bash_profile
+  template:
+    src: bash_profile
+    dest: "{{ ansible_env.HOME }}/.bash_profile"
+
+- name: Add pacman.conf
+  become: true
+  template:
+    src: pacman.conf
+    dest: /etc/pacman.conf
+    force: true
+
+- name: Add TLP configuration
+  become: true
+  template:
+    src: tlp.conf
+    dest: /etc/tlp.conf
+    force: true
+
+- name: Setup Lockscreen
+  block:
+    - name: Setup Lockscreen autolock after certain timeout (With xset)
+
+    - name: Setup Lockscreen to lock using archlinux-logout
+
+    - name: Setup Lockscreen to lock using keyboard shortcuts
+
+

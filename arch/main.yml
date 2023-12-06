@@ -10,9 +10,16 @@
     - name: Install baseline applications
       import_tasks: baseline.yml
 
+    - name: Configure Systemd Services
+      import_tasks: services.yml
+
     - name: Install qtile
       import_tasks: qtile.yml
       tags: qtile
+
+    - name: Install Hyprland
+      import_tasks: hyprland.yml
+      tags: hyprland
 
     - name: Install theming tools
       import_tasks: theme.yml

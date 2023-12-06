@@ -7,13 +7,36 @@
 - name: Copy ssl cert to remote machine
   ansible.windows.win_copy:
     src: "files/{{ certname }}"
-    dest: "{{ temp_path }}{{ certname }}"
+    dest: "{{ temp_path }}/{{ certname }}"
 
 - name: Import ssl cert
-  ansible.windows.win_certificate_store:
-    path: "{{ temp_path }}{{ certname }}"
-    store_location: LocalMachine
-    store_name: Root
+  block:
+    - name: Import ssl cert to machine's personal store
+      ansible.windows.win_certificate_store:
+        path: "{{ temp_path }}/{{ certname }}"
+        store_location: LocalMachine
+        store_name: My
+        key_storage: machine
+
+    - name: Import ssl cert to machine's root trusted root cert store
+      ansible.windows.win_certificate_store:
+        path: "{{ temp_path }}/{{ certname }}"
+        store_location: LocalMachine
+        store_name: Root 
+        key_storage: machine
   become: true
   become_method: runas
   become_user: SYSTEM
+
+- name: Copy cert and key to 3M Certificate store
+  block:
+    - name: Copy to 3M Cert
+      ansible.windows.win_copy:
+        src: "files/{{ certname }}"
+        dest: " {{ 3m_cms_cert_path }}/cert"
+
+    - name: Copy to 3M Cert
+      ansible.windows.win_copy:
+        src: "files/{{ certname }}.key"
+        dest: " {{ 3m_cms_cert_path }}/cert.key"
+  # when: "{{ ansible_var.hostname }}"
