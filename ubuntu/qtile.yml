@@ -1,0 +1,57 @@
+---
+- name: Install qtile dependencies
+  become: true
+  become_user: aur_builder
+  kewlfft.aur.aur:
+    name:
+      - python-dbus-next
+      - python-iwlib
+      - qtile-extras
+
+- name: Install qtile
+  become: true
+  pacman:
+    name: qtile
+
+- name: Install xorg packages
+  become: true
+  pacman:
+    name:
+      - i3lock
+      - autorandr
+      - arandr
+      - dunst
+      - feh
+      - lightdm-gtk-greeter
+      - lightdm-gtk-greeter-settings
+      - picom
+      - rofi
+      - xss-lock
+  tags: xorg
+
+- name: Install xorg packages AUR
+  become: true
+  become_user: aur_builder
+  kewlfft.aur.aur:
+    name:
+      - arcolinux-logout
+
+- name: Install wayland packages
+  become: true
+  become_user: aur_builder
+  kewlfft.aur.aur:
+    name:
+      - dunst
+      - imv
+      - gtklock
+      - kanshi
+      - nwg-look
+      - rofi
+      - swaybg
+      - swayidle
+      - swaylock
+      - wlroots
+      - wl-clipboard
+      - wl-logout
+      - wlr-randr
+

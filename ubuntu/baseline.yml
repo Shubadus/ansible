@@ -1,0 +1,166 @@
+---
+- name: Add apt repositories
+  apt_repository:
+    repo: "{{ item }}"
+  loop:
+    - ppa:appimagelauncher-team/stable
+    - ppa:slimbook/slimbook
+    - ppa:neovim-ppa/stable
+    - deb http://download.opensuse.org/repositories/home:/justkidding/xUbuntu_22.04/ /
+
+- name: Install tools
+  become: true
+  apt:
+    name:
+      - flatpak # System Agnostic Package Management
+      - filelight # Disk Usage Display
+      - mpv # Lightweight Media Player
+      - qbittorrent # Torrent Client
+
+- name: Install Flatpak programs
+  community.general.flatpak:
+    name:
+      - com.github.tchx84.Flatseal #Flatpak Permissions GUI Manager
+      # - com.github.d4nj1.tlpui
+      - com.bitwarden.desktop
+      - io.podman_desktop.PodmanDesktop
+      - md.obsidian.Obsidian
+      - org.remmina.Remmina
+      - org.libreoffice.LibreOffice
+
+- name: Install archiving tools
+  become: true
+  apt:
+    name:
+      - zip
+      - unrar
+      - unzip
+
+- name: Install browsers
+  become: true
+  apt:
+    name:
+      - qutebrowser
+
+- name: Install browsers (flatpak)
+  community.general.flatpak:
+    name:
+      - org.brave.Browser
+      - org.chromium.Chromium
+
+- name: Install AUR packages
+  become: true
+  apt:
+    name:
+      - appimagelauncher
+      - slimbookbattery
+      - slimbookintelcontroller
+      # - webapp-manager
+- name: Install terminals and terminal software
+  become: true
+  apt:
+    name:
+      - alacritty
+      - bash-completion
+      - btop
+      - git
+      - lshw
+      - tmux
+
+- name: Install NeoVim
+  become: true
+  apt:
+    name: neovim
+
+- name: Install backup software
+  become: true
+  apt:
+    name: timeshift
+
+- name: Install build software
+  become: true
+  apt:
+    name:
+      - cmake
+      - meson
+
+- name: Install file managers and dependencies
+  become: true
+  apt:
+    name:
+      - ranger
+      - ueberzugpp # for image viewing in ranger
+
+# - name: ensure power-profiles-daemon is removed
+#   become: true
+#   apt:
+#     name: power-profiles-daemon
+#     state: absent
+
+- name: Install power and thermal management
+  become: true
+  apt:
+    name:
+      - tlp
+      - thermald 
+      # - xfce4-power-manager
+
+- name: Install printing system
+  apt:
+    name:
+      - cups
+      - system-config-printer
+  become: true
+
+- name: Install programming langauages, packages, and frameworks
+  become: true
+  apt:
+    name:
+      - golang
+      - gcc
+      - nodejs
+      - python-pip
+      - python-poetry
+      - rust-1.62-all
+
+# - name: Install audio and audio control
+#   become: true
+#   apt:
+#     name: 
+#       - pipewire
+#       - pipewire-alsa
+#       - pipewire-pulse
+#       - pavucontrol
+#       - wireplumber
+
+- name: Install Virtualization
+  become: true
+  apt:
+    name:
+      - dnsmasq
+      - iptables-nft
+      - libvirt
+      - qemu
+      # - swtpm
+      - virt-manager
+
+- name: Install misc packages
+  become: true
+  apt:
+    name:
+      - docker
+      - imagemagick
+
+# - name: Install xdg-desktop-portal(s)
+#   become: true
+#   apt:
+#     name:
+#       - xdg-desktop-portal
+#       - xdg-desktop-portal-gtk
+
+# - name: Ensure xdg-desktop-portal-gnome is absent
+#   become: true
+#   apt:
+#     name: xdg-desktop-portal-gnome
+#     state: absent
+

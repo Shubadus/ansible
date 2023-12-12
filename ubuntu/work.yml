@@ -1,0 +1,18 @@
+---
+- name: install work flatpak applications
+  community.general.flatpak:
+    name:
+      - com.microsoft.Edge
+      - com.github.IsmaelMartinez.teams_for_linux
+      - com.visualstudio.code
+
+- name: Install work applications from package manager
+  become: true
+  become_user: aur_builder
+  kewlfft.aur.aur:
+    name:
+      - onedrive-abraunegg
+      - onedrivegui
+      - 1password
+      - 1password-cli
+

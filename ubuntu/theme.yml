@@ -1,0 +1,31 @@
+---
+- name: Install themes
+  become: true
+  apt:
+    name:
+      - adwaita-cursors
+      - adwaita-icon-theme
+      - breeze
+      - breeze-gtk
+      - breeze-grub
+      - breeze-icons
+      - libadwaita
+      - materia-gtk-theme
+      - tela-icon-theme
+  # when: 
+  #
+# - name: Install themes (Flatpak)
+#   community.general.flatpak:
+#     name:
+  
+- name: Install fonts
+  become: true
+  git:
+    repo: https://github.com/ryanoasis/nerd-fonts.git
+    dest: /tmp/nerd-fonts
+#   pacman:
+#     name:
+#       - ttf-noto-nerd
+#       - ttf-nerd-fonts-symbols
+#       - ttf-nerd-fonts-symbols-common
+
