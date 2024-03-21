@@ -13,7 +13,7 @@
     name:
       - hyprbars-git
       - pyprland
-      - waybar-hyprland-git
+      - waybar
   tags: xorg
 
 - name: Install wayland packages
@@ -26,11 +26,13 @@
       - imv
       - gtklock
       - grim
-      - kanshi
+      - light
       - nwg-look
+      - nwg-displays
       - slurp
       - swaybg
       - swayidle
+      - swaylock-effects
       - wlroots
       - wl-clipboard
       - wl-logout
@@ -43,12 +45,6 @@
       git:
         repo: https://github.com/hyprwm/contrib
         dest: /tmp/hyprwm-contrib
-
-    # - name: Install Try_Swap_Workspace
-    #   become: true
-    #   community.general.make:
-    #     chdir: /tmp/hyprwm-contrib/try_swap_workspace
-    #     target: install
 
     - name: Install Grimblast
       become: true

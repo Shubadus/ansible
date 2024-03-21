@@ -19,17 +19,40 @@
   become: true
   pacman:
     name:
+      - alsa-utils
+      - bc # terminal calculator
+      - dnsutils
       - flatpak # System Agnostic Package Management
       - filelight # Disk Usage Display
+      - jq # JSON Processor
+      - less
       - libreoffice # Office Suite
+      - man # Read Manual Pages
       - mpv # Lightweight Media Player
+      - pacman-contrib # Tools for Pacman updates
       - qbittorrent # Torrent Client
+      - tk # tkinter
+
+- name: Setup Polkit
+  block:
+    - name: Install Polkit
+      become: true
+      pacman:
+        name:
+          - polkit
+          - polkit-gnome
+
+    - name: Ensure Polkit service is started
+      become: true
+      systemd:
+        name: polkit
+        state: started
+        enabled: true
 
 - name: Install Flatpak programs
   community.general.flatpak:
     name:
       - com.github.tchx84.Flatseal #Flatpak Permissions GUI Manager
-      # - com.github.d4nj1.tlpui
       - com.bitwarden.desktop
       - io.podman_desktop.PodmanDesktop
       - md.obsidian.Obsidian
@@ -64,8 +87,7 @@
   kewlfft.aur.aur:
     name:
       - appimagelauncher
-      - slimbookbattery
-      # - slimbookintelcontroller
+      - noisetorch
       - webapp-manager
       - ueberzugpp
 
@@ -113,21 +135,8 @@
       - thunar-media-tags-plugin
       - thunar-vcs-plugin
       - thunar-volman
+      - tumbler # Thumbnail images for thunar
       - ueberzugpp # for image viewing in ranger
-
-- name: ensure power-profiles-daemon is removed
-  become: true
-  pacman:
-    name: power-profiles-daemon
-    state: absent
-
-- name: Install power and thermal management
-  become: true
-  pacman:
-    name:
-      - tlp
-      - thermald 
-      - xfce4-power-manager
 
 - name: Install printing system
   pacman:
@@ -145,6 +154,7 @@
       - nodejs
       - python-pip
       - python-poetry
+      - python-pynvim
       - rustup
 
 - name: Install audio and audio control
@@ -175,12 +185,13 @@
       - docker
       - imagemagick
 
-- name: Install xdg-desktop-portal(s)
+- name: Install xdg packages
   become: true
   pacman:
     name:
       - xdg-desktop-portal
       - xdg-desktop-portal-gtk
+      - xdg-user-dirs
 
 - name: Ensure xdg-desktop-portal-gnome is absent
   become: true

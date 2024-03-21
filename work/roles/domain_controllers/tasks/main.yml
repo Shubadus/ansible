@@ -4,17 +4,12 @@
   remote_user: administrator
 
   tasks:
+    - name: Update server
+      ansible.windows.win_updates:
+        reboot: false
+
     - name: Make server domain controller
       block:
-        - name: Add server to domain controller
-          win_domain_membership:
-
-          register: domain_join
-
-        - name: Reboot to complete domain join when needed
-          win_reboot:
-          when: domain_join.reboot_required
-
         - name: Promote server to domain controller
           win_domain_controller:
             dns_domain_name: cameron.lan
@@ -27,5 +22,10 @@
           win_reboot:
           when: dc_promote.reboot_required
       
+    - name: Configure DHCP
+
+    - name: Configure DNS
+
+    - name: Configure Scheduled Tasks
 
 # vim:ft=yaml.ansible

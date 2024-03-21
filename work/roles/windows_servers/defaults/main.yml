@@ -1,0 +1,4 @@
+---
+# defaults file for windows_servers
+domain_ou_path: "OU=Virtual,OU=Servers,DC=Cameron,DC=Lan"
+domain_name: cameron.lan

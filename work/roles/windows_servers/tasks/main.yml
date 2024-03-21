@@ -1,0 +1,20 @@
+---
+# tasks file for windows_servers
+- name: Add to domain
+  ansible.windows.win_domain_membership:
+    dns_domain_name: "{{ domain_name }}" 
+    hostname: "{{ hostname }}"
+    domain_admin_user: "{{ domain_admin_user }}"
+    domain_admin_password: "{{ domain_admin_password }}"
+    domain_ou_path: "{{ domain_ou_path }}"
+    state: domain
+  register: domain_join
+
+- name: Apply Windows updates
+  ansible.windows.win_updates:
+
+- name: Reboot device to complete domain join
+  ansible.windows.win_reboot:
+    reboot_timeout: 3600
+  when: domain_join.reboot_required
+

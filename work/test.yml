@@ -1,0 +1,5 @@
+---
+- hosts: dc
+  tasks:
+    - name: Get server details
+      setup:

@@ -1,18 +1,4 @@
 ---
-- name: Enable tlp power management
-  become: true
-  systemd:
-    name: tlp.service
-    state: started
-    enabled: true
-
-- name: Enable thermald service
-  become: true
-  systemd:
-    name: thermald.service
-    state: started
-    enabled: true
-
 - name: Enable libvirt daemons
   become: true
   systemd:

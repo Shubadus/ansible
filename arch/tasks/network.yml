@@ -1,0 +1,25 @@
+---
+# TODO: Setup replacing iptables with iptables-nft
+- name: Install Network Manager tools
+  become: true
+  pacman:
+    name:
+      - networkmanager
+      - network-manager-applet
+      - nm-connection-editor
+
+- name: Install VPN related applications
+  become: true
+  become_user: aur_builder
+  kewlfft.aur.aur:
+    name:
+      - networkmanager-openconnect
+      - networkmanager-openconnect-useragent-git
+      - openconnect
+
+- name: Ensure systemd-resolve service is running
+  become: true
+  systemd:
+    name: systemd-resolved
+    state: started
+    enabled: true

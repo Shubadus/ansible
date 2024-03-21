@@ -1,0 +1,35 @@
+---
+- name: ensure power-profiles-daemon is removed
+  become: true
+  pacman:
+    name: power-profiles-daemon
+    state: absent
+
+- name: Install power and thermal management
+  become: true
+  pacman:
+    name:
+      - tlp
+      - thermald 
+      - xfce4-power-manager
+
+- name: Enable tlp power management
+  become: true
+  systemd:
+    name: tlp.service
+    state: started
+    enabled: true
+
+- name: Enable thermald service
+  become: true
+  systemd:
+    name: thermald.service
+    state: started
+    enabled: true
+
+- name: Install SlimBook Battery app
+  become: true
+  become_user: aur_builder
+  kewlfft.aur.aur:
+    name:
+      - slimbookbattery

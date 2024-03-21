@@ -1,0 +1,50 @@
+---
+# tasks file for nimble
+- hosts: localhost
+  tasks:
+    - name: Create Nimble Array
+      # https://docs.ansible.com/ansible/latest/collections/hpe/nimble/hpe_nimble_array_module.html#ansible-collections-hpe-nimble-hpe-nimble-array-module
+    - name: Create Initiator Groups
+      hpe.nimble.hpe_nimble_initiator_group:
+        host: "{{ nimble.hostname }}"
+        username: "{{ nimble.user }}"
+        password: "{{ nimble.password }}"
+        access_protocol: "{{ igroup.access_protocol }}"
+        name: "{{ igroup.name }}"
+        iscsi_initiators: "{{ igroup.iscsi_initiators }}"
+        description: "{{ igroup.description | default(None) }}"
+      loop: "{{ nimble.igroups }}"
+      loop_control:
+        loop_var: igroup
+
+      # https://docs.ansible.com/ansible/latest/collections/hpe/nimble/hpe_nimble_initiator_group_module.html#ansible-collections-hpe-nimble-hpe-nimble-initiator-group-module
+    - name: Create Local Users
+      hpe.nimble.hpe_nimble_user:
+        host: "{{ nimble.hostname }}"
+        username: "{{ nimble.user }}"
+        password: "{{ nimble.password }}"
+        name: cameron_nimble_admin
+        description: Local Admin account for HPE Nimble Servers
+        state: present
+
+      # https://docs.ansible.com/ansible/latest/collections/hpe/nimble/hpe_nimble_user_module.html#ansible-collections-hpe-nimble-hpe-nimble-user-module
+    - name: Manage Network Configuration
+      # TODO: 
+      hpe.nimble.hpe_nimble_network:
+        host: "{{ nimble.hostname }}"
+        username: "{{ nimble.user }}"
+        password: "{{ nimble.password }}"
+        name: active
+        route: "{{ nimble.network.route }}"
+        subnet: "{{ nimble.network.subnet }}"
+        array: "{{ nimble.network.array }}"
+        iscsi_automatic_connection_method: true
+        iscsi_connection_rebalancing: true
+        mgmt_ip: "{{ nimble.network.primary_mgmt_ip }}"
+        secondary_mgmt_ip: "{{ nimble.network.secondary_mgmt_ip | default(None}}"
+        state: present
+        activate: true
+      # https://docs.ansible.com/ansible/latest/collections/hpe/nimble/hpe_nimble_network_module.html#ansible-collections-hpe-nimble-hpe-nimble-network-module
+    - name: Manage Access Control Records
+
+      # https://docs.ansible.com/ansible/latest/collections/hpe/nimble/hpe_nimble_access_control_record_module.html#ansible-collections-hpe-nimble-hpe-nimble-access-control-record-module

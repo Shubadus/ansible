@@ -1,0 +1,38 @@
+---
+# - name: Set variables
+#   set_fact:
+#     config_folder: "{{ ansible_env.HOME }}/.config"
+#     git_folder: "{{ ansible_env.HOME }}/git"
+#     script_folder: "{{ ansible_env.HOME }}/.local/bin"
+
+- name: Ensure git folder exists in HOME Directory
+  file:
+    path: "{{ git_folder }}"
+    state: directory
+
+- name: Check for Dotfiles directory
+  stat:
+    path: "{{ git_folder }}/dotfiles"
+  register: "dotfiles_dir"
+
+- name: Download Dotfiles
+  git:
+    repo: https://github.com/Shubadus/dotfiles.git
+    dest: "{{ git_folder }}/dotfiles"
+  when: not dotfiles_dir.stat.exists
+
+- name: Link Dotfile Folders
+  include_tasks: config_setup.yml
+  loop: "{{ dotfiles }}"
+
+- name: Ensure ~/.local/bin path exists
+  file:
+    path: "{{ script_folder }}"
+    state: directory
+
+- name: Add Scripts folder to ~/.local/bin
+  file:
+    src: "{{ git_folder }}/dotfiles/scripts"
+    dest: "{{ script_folder }}/scripts"
+    state: link
+

@@ -1,0 +1,40 @@
+
+---
+- hosts: localhost
+  tasks:
+    - name: Add ESXi Host
+      # https://docs.ansible.com/ansible/latest/collections/community/vmware/vmware_host_module.html#ansible-collections-community-vmware-vmware-host-module
+      community.vmware.vmware_host:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        datacenter: Production Datacenter
+        cluster: "{{ cluster_name }}"
+        esxi_hostname: "{{ esxi_hostname }}"
+        esxi_username: "{{ esxi_username }}"
+        esxi_password: "{{ esxi_password }}"
+        state: present
+      delegate_to: localhost
+
+    - name: Configure ESXi Host DNS
+      # https://docs.ansible.com/ansible/latest/collections/community/vmware/vmware_host_dns_module.html#ansible-collections-community-vmware-vmware-host-dns-module 
+      delegate_to: localhost
+
+    - name: Configure ESXi Host Power Settings
+      # https://docs.ansible.com/ansible/latest/collections/community/vmware/vmware_host_powermgmt_policy_module.html#ansible-collections-community-vmware-vmware-host-powermgmt-policy-module
+      delegate_to: localhost
+    - name: Configure ESXi Host Firewall Settings
+      # https://docs.ansible.com/ansible/latest/collections/community/vmware/vmware_host_firewall_manager_module.html#ansible-collections-community-vmware-vmware-host-firewall-manager-module
+      delegate_to: localhost
+    - name: Configure ESXi Host iSCSI Configuration
+      # https://docs.ansible.com/ansible/latest/collections/community/vmware/vmware_host_iscsi_module.html#ansible-collections-community-vmware-vmware-host-iscsi-module
+      delegate_to: localhost
+    - name: Configure ESXi Host Network Settings
+      # https://docs.ansible.com/ansible/latest/collections/community/vmware/vmware_host_tcpip_stacks_module.html#ansible-collections-community-vmware-vmware-host-tcpip-stacks-module
+      delegate_to: localhost
+    - name: Configure ESXi Host vswitch
+      # https://docs.ansible.com/ansible/latest/collections/community/vmware/vmware_vswitch_module.html#ansible-collections-community-vmware-vmware-vswitch-module
+      delegate_to: localhost
+    - name: Configure ESXi Host Advanced Settings
+      # https://docs.ansible.com/ansible/latest/collections/community/vmware/vmware_host_config_manager_module.html#ansible-collections-community-vmware-vmware-host-config-manager-module
+      delegate_to: localhost

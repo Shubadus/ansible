@@ -1,0 +1,25 @@
+---
+- name: Set Source and Destination paths
+  set_fact:
+    src_folder: "{{ git_folder }}/dotfiles/{{ item }}"
+    dest_folder: "{{ config_folder }}/{{ item }}"
+
+- name: Check if config folder exists
+  stat:
+    path: "{{ dest_folder }}"
+  register: conf_folder
+
+- name: Remove config folder
+  file:
+    path: "{{ dest_folder }}"
+    state: absent
+  when: 
+    - conf_folder.stat.exists
+    - not conf_folder.stat.mimetype == "inode/symlink"
+
+- name: Link config
+  file:
+    src: "{{ src_folder }}"
+    dest: "{{ dest_folder }}"
+    state: link
+

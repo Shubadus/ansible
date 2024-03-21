@@ -1,5 +1,23 @@
 ---
 - hosts: localhost 
+  vars:
+    config_folder: "{{ ansible_env.HOME }}/.config"
+    git_folder: "{{ ansible_env.HOME }}/git"
+    script_folder: "{{ ansible_env.HOME }}/.local/bin"
+    dotfiles:
+    - alacritty
+    - btop
+    - dunst
+    - gtklock
+    - hypr
+    - ranger
+    - starship
+    - swaybg
+    - swaylock
+    - waybar
+    - wlogout
+    - wofi
+
   tasks: 
     - name: Update Packages
       pacman:
@@ -7,28 +25,21 @@
         upgrade: true
       become: true
 
-    - name: Install baseline applications
-      import_tasks: baseline.yml
-
-    - name: Configure Systemd Services
-      import_tasks: services.yml
-
-    - name: Install qtile
-      import_tasks: qtile.yml
-      tags: qtile
-
-    - name: Install Hyprland
-      import_tasks: hyprland.yml
-      tags: hyprland
-
-    - name: Install theming tools
-      import_tasks: theme.yml
-
-    - name: Install work Applications
-      import_tasks: work.yml
+    - import_tasks: baseline.yml
+    - import_tasks: config.yml
+    - import_tasks: services.yml
+    - import_tasks: power.yml
+    - import_tasks: network.yml
+    - import_tasks: hyprland.yml
+    - import_tasks: theme.yml
+    - import_tasks: work.yml
 
     - name: Create User Folders
       shell:
         cmd: xdg-user-dirs-update
         chdir: "{{ ansible_env.HOME }}"
         creates: "{{ ansible_env.HOME }}/Documents"
+
+    - name: Cleanup ansible settings
+      import_tasks: cleanup.yml
+

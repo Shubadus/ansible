@@ -11,13 +11,18 @@
       - breeze-icons
       - libadwaita
       - materia-gtk-theme
-      - tela-icon-theme
+
   # when: 
   #
-- name: Install themes (Flatpak)
+  #- name: Install themes (Flatpak)
+  #community.general.flatpak:
+  #  name:
+  #      -  
+  #
+- name: Install Flatpak themes
   community.general.flatpak:
     name:
-      -  
+      - org.gtk.Gtk3theme.Materia-dark-compact
   
 - name: Install fonts
   become: true
@@ -41,3 +46,4 @@
     name:
       - qt5-styleplugins
       - qt6gtk2
+      - tela-icon-theme

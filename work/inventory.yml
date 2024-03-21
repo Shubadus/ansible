@@ -19,8 +19,16 @@ all:
           ansible_connection: ssh
           ansible_user: cody-admin
           # ansible_winrm_server_cert_validation: ignore
-          # ansible_winrm_transport: credssp
+          ansible_winrm_transport: credssp
           remote_tmp: C:\users\cody-admin\tmp
           ansible_shell_type: cmd
           # ansible_shell_type: powershell
           # shell_type: powershell
+    dc:
+      hosts:
+        cmch-dc2.cameron.lan:
+          ansible_connection: winrm
+          ansible_user: administrator
+          ansible_password: "&lXRWS_iHVnZ!^o&5&BXrgNVZSPJk?"
+          ansible_winrm_server_cert_validation: ignore
+          ansible_winrm_transport: ntlm
